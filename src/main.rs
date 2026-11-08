@@ -1,15 +1,19 @@
 // UniBijoy & English System-wide Keyboard for Windows
 // Written in Pure Rust with zero external dependencies.
 
+#![windows_subsystem = "windows"]
+
 mod win32;
 mod config;
 mod layout;
 mod engine;
 mod hook;
+mod tray;
 
 use config::{AppConfig, ShortcutKey, TypingStyle};
 use win32::*;
 use hook::{install_hook, uninstall_hook, print_mode_banner, ENGINE, CONFIG};
+use tray::init_tray;
 
 unsafe extern "system" fn ctrl_handler(_ctrl_type: u32) -> BOOL {
     uninstall_hook();
@@ -17,7 +21,12 @@ unsafe extern "system" fn ctrl_handler(_ctrl_type: u32) -> BOOL {
 }
 
 fn main() {
-    // Enable ANSI colors in Windows console
+    // If run from a command prompt or PowerShell, attach to its console for logging
+    unsafe {
+        AttachConsole(0xFFFFFFFF); // ATTACH_PARENT_PROCESS
+    }
+
+    // Enable ANSI colors if running in a console
     enable_ansi_colors();
 
     // Load or create user configuration (config.ini)
@@ -30,8 +39,6 @@ fn main() {
         engine.typing_style = config.typing_style;
     }
 
-    let start_hidden = config.start_hidden;
-
     print_welcome_banner(&config);
 
     // Save active config in hook
@@ -40,12 +47,6 @@ fn main() {
         *cfg_guard = Some(config);
     }
 
-    let args: Vec<String> = std::env::args().collect();
-    let is_hidden_flag = args.iter().any(|a| a == "--hidden" || a == "--tray" || a == "-h");
-
-    if start_hidden || is_hidden_flag {
-        hide_console_window();
-    }
     unsafe {
         SetConsoleCtrlHandler(Some(ctrl_handler), 1);
     }
@@ -62,6 +63,9 @@ fn main() {
     };
     print_mode_banner(initial_mode);
 
+    // Initialize System Tray Icon (notification area)
+    let tray_hwnd = init_tray(initial_mode);
+
     // Enter standard Windows message dispatch loop
     unsafe {
         let mut msg: MSG = std::mem::zeroed();
@@ -71,6 +75,10 @@ fn main() {
         }
     }
 
+    // Cleanup tray and hook
+    if !tray_hwnd.is_null() {
+        tray::remove_tray_icon(tray_hwnd);
+    }
     uninstall_hook();
 }
 

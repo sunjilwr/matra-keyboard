@@ -2,8 +2,8 @@
 
 #[cfg(test)]
 mod tests {
-    use bnkeyboard::layout::*;
-    use bnkeyboard::engine::{Engine, KeyboardMode};
+    use borno::layout::*;
+    use borno::engine::{Engine, KeyboardMode};
 
     #[test]
     fn test_vowels_via_link_key() {
@@ -168,11 +168,11 @@ mod tests {
         // 3. User presses physical Shift key (VK_SHIFT = 0x10)
         assert!(!engine.handle_key_down(0x10, true, false, false));
         // Verify last_typed is still Consonant("ম") even after Shift key was pressed!
-        assert_eq!(engine.last_typed, bnkeyboard::engine::LastTyped::Consonant("ম"));
+        assert_eq!(engine.last_typed, borno::engine::LastTyped::Consonant("ম"));
         // 4. Type 'A' (0x41) with Shift held down -> triggers Reph replacement!
         assert!(engine.handle_key_down(0x41, true, false, false));
         // Verify state after Reph
-        assert_eq!(engine.last_typed, bnkeyboard::engine::LastTyped::Other);
+        assert_eq!(engine.last_typed, borno::engine::LastTyped::Other);
     }
 
     #[test]

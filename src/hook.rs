@@ -70,6 +70,12 @@ pub unsafe extern "system" fn low_level_keyboard_proc(
             let mut engine = ENGINE.lock().unwrap();
             let new_mode = engine.toggle_mode();
             print_mode_banner(new_mode);
+
+            // Update tray tooltip if tray window exists
+            let hwnd = crate::tray::get_tray_hwnd();
+            if !hwnd.is_null() {
+                crate::tray::update_tray_tooltip(hwnd, new_mode);
+            }
         }
         return 1; // Swallow the toggle keypress completely
     }

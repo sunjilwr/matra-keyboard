@@ -32,7 +32,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
-Name: "startwithwindows"; Description: "Automatically start Borno when Windows starts"; GroupDescription: "Startup Options:"
+Name: "startwithwindows"; Description: "Automatically start Borno when Windows starts (System Tray)"; GroupDescription: "Startup Options:"; Flags: checkedonce
 
 [Files]
 Source: "target\release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion

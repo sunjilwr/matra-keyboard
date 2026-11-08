@@ -12,6 +12,23 @@ pub type BOOL = i32;
 pub type WPARAM = usize;
 pub type LPARAM = isize;
 pub type HOOKPROC = Option<unsafe extern "system" fn(code: i32, w_param: WPARAM, l_param: LPARAM) -> LRESULT>;
+pub type WNDPROC = Option<unsafe extern "system" fn(hwnd: HWND, msg: u32, w_param: WPARAM, l_param: LPARAM) -> LRESULT>;
+
+#[repr(C)]
+pub struct WNDCLASSEXW {
+    pub cbSize: u32,
+    pub style: u32,
+    pub lpfnWndProc: WNDPROC,
+    pub cbClsExtra: i32,
+    pub cbWndExtra: i32,
+    pub hInstance: HINSTANCE,
+    pub hIcon: *mut std::ffi::c_void,
+    pub hCursor: *mut std::ffi::c_void,
+    pub hbrBackground: *mut std::ffi::c_void,
+    pub lpszMenuName: *const u16,
+    pub lpszClassName: *const u16,
+    pub hIconSm: *mut std::ffi::c_void,
+}
 
 #[repr(C)]
 #[derive(Clone, Copy, Default)]
@@ -165,10 +182,91 @@ unsafe extern "system" {
     pub fn GetKeyState(nVirtKey: i32) -> i16;
     pub fn keybd_event(bVk: u8, bScan: u8, dwFlags: u32, dwExtraInfo: usize);
     pub fn ShowWindow(hWnd: HWND, nCmdShow: i32) -> BOOL;
+    pub fn RegisterClassExW(lpwcx: *const WNDCLASSEXW) -> u16;
+    pub fn CreateWindowExW(
+        dwExStyle: u32,
+        lpClassName: *const u16,
+        lpWindowName: *const u16,
+        dwStyle: u32,
+        X: i32,
+        Y: i32,
+        nWidth: i32,
+        nHeight: i32,
+        hWndParent: HWND,
+        hMenu: *mut std::ffi::c_void,
+        hInstance: HINSTANCE,
+        lpParam: *mut std::ffi::c_void,
+    ) -> HWND;
+    pub fn DefWindowProcW(hWnd: HWND, Msg: u32, wParam: WPARAM, lParam: LPARAM) -> LRESULT;
+    pub fn CreatePopupMenu() -> *mut std::ffi::c_void;
+    pub fn AppendMenuW(hMenu: *mut std::ffi::c_void, uFlags: u32, uIDNewItem: usize, lpNewItem: *const u16) -> BOOL;
+    pub fn TrackPopupMenu(
+        hMenu: *mut std::ffi::c_void,
+        uFlags: u32,
+        x: i32,
+        y: i32,
+        nReserved: i32,
+        hWnd: HWND,
+        prcRect: *const std::ffi::c_void,
+    ) -> BOOL;
+    pub fn DestroyMenu(hMenu: *mut std::ffi::c_void) -> BOOL;
+    pub fn SetForegroundWindow(hWnd: HWND) -> BOOL;
+    pub fn GetCursorPos(lpPoint: *mut POINT) -> BOOL;
+    pub fn LoadImageW(
+        hInst: HINSTANCE,
+        name: *const u16,
+        r#type: u32,
+        cx: i32,
+        cy: i32,
+        fuLoad: u32,
+    ) -> *mut std::ffi::c_void;
+    pub fn LoadIconW(hInstance: HINSTANCE, lpIconName: *const u16) -> *mut std::ffi::c_void;
+}
+
+#[repr(C)]
+pub struct NOTIFYICONDATAW {
+    pub cbSize: u32,
+    pub hWnd: HWND,
+    pub uID: u32,
+    pub uFlags: u32,
+    pub uCallbackMessage: u32,
+    pub hIcon: *mut std::ffi::c_void,
+    pub szTip: [u16; 128],
+    pub dwState: u32,
+    pub dwStateMask: u32,
+    pub szInfo: [u16; 256],
+    pub uTimeoutOrVersion: u32,
+    pub szInfoTitle: [u16; 64],
+    pub dwInfoFlags: u32,
+    pub guidItem: [u8; 16],
+    pub hBalloonIcon: *mut std::ffi::c_void,
+}
+
+pub const NIM_ADD: u32 = 0x00000000;
+pub const NIM_MODIFY: u32 = 0x00000001;
+pub const NIM_DELETE: u32 = 0x00000002;
+
+pub const NIF_MESSAGE: u32 = 0x00000001;
+pub const NIF_ICON: u32 = 0x00000002;
+pub const NIF_TIP: u32 = 0x00000004;
+pub const NIF_INFO: u32 = 0x00000010;
+
+#[link(name = "shell32")]
+unsafe extern "system" {
+    pub fn Shell_NotifyIconW(dwMessage: u32, lpData: *mut NOTIFYICONDATAW) -> BOOL;
+    pub fn ShellExecuteW(
+        hwnd: HWND,
+        lpOperation: *const u16,
+        lpFile: *const u16,
+        lpParameters: *const u16,
+        lpDirectory: *const u16,
+        nShowCmd: i32,
+    ) -> HINSTANCE;
 }
 
 #[link(name = "kernel32")]
 unsafe extern "system" {
+    pub fn AttachConsole(dwProcessId: u32) -> BOOL;
     pub fn GetModuleHandleW(lpModuleName: *const u16) -> HINSTANCE;
     pub fn Beep(dwFreq: u32, dwDuration: u32) -> BOOL;
     pub fn GetStdHandle(nStdHandle: u32) -> *mut std::ffi::c_void;
@@ -179,6 +277,10 @@ unsafe extern "system" {
         HandlerRoutine: Option<unsafe extern "system" fn(dwCtrlType: u32) -> BOOL>,
         Add: BOOL,
     ) -> BOOL;
+}
+
+pub fn to_wide_string(s: &str) -> Vec<u16> {
+    s.encode_utf16().chain(std::iter::once(0)).collect()
 }
 
 pub const SW_HIDE: i32 = 0;
