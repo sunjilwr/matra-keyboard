@@ -155,7 +155,7 @@ start_hidden = {}
 #   false = Single global mode across all applications.
 per_window_mode = {}
 
-# Sleek on-screen floating "বাংলা" / "EN" badge near typing cursor (true / false)
+# Sleek on-screen floating "BN" / "EN" badge near typing cursor (true / false)
 osd_badge = {}
 "#,
             shortcut_str,

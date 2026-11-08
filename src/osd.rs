@@ -1,15 +1,15 @@
 // Modern Floating On-Screen Display (OSD) Badge for Borno (বর্ণ)
-// Displays a sleek, minimalist "বাংলা" / "EN" pill next to the text cursor
+// Displays a sleek, minimalist "BN" / "EN" pill next to the text cursor
 // without taking focus or disrupting typing. Zero external dependencies.
 
 use std::sync::atomic::{AtomicIsize, Ordering};
 use crate::engine::KeyboardMode;
 use crate::win32::*;
 
-const BADGE_WIDTH: i32 = 76;
-const BADGE_HEIGHT: i32 = 30;
+const BADGE_WIDTH: i32 = 52;
+const BADGE_HEIGHT: i32 = 28;
 const HIDE_TIMER_ID: usize = 9001;
-const HIDE_DELAY_MS: u32 = 650;
+const HIDE_DELAY_MS: u32 = 600;
 
 pub const WM_SHOW_BADGE: u32 = 0x0400 + 2; // WM_USER + 2
 
@@ -39,8 +39,8 @@ pub unsafe extern "system" fn osd_window_proc(
             let (x, y) = unsafe { compute_badge_position() };
 
             unsafe {
-                // Ensure rounded region
-                let rgn = CreateRoundRectRgn(0, 0, BADGE_WIDTH, BADGE_HEIGHT, 14, 14);
+                // Ensure rounded region (smooth pill shape)
+                let rgn = CreateRoundRectRgn(0, 0, BADGE_WIDTH, BADGE_HEIGHT, 12, 12);
                 SetWindowRgn(hwnd, rgn, 1);
 
                 // Position and show window without activating
@@ -78,32 +78,32 @@ pub unsafe extern "system" fn osd_window_proc(
                 let mode_val = CURRENT_MODE.load(Ordering::SeqCst);
                 let is_bangla = mode_val == 1;
 
-                // 1. Sleek Dark Background Brush: RGB(28, 28, 34) -> 0x00221C1C
-                let bg_brush = CreateSolidBrush(0x00221C1C);
+                // 1. Sleek Dark Obsidian Background: RGB(26, 26, 32) -> 0x00201A1A
+                let bg_brush = CreateSolidBrush(0x00201A1A);
                 let rect = RECT { left: 0, top: 0, right: BADGE_WIDTH, bottom: BADGE_HEIGHT };
                 FillRect(hdc, &rect, bg_brush);
                 DeleteObject(bg_brush);
 
-                // 2. Select font
-                let font_name = to_wide_string("Kalpurush");
+                // 2. Select font (Segoe UI for ultra-crisp modern Latin typography)
+                let font_name = to_wide_string("Segoe UI");
                 let h_font = CreateFontW(
                     17, // Height
                     0, 0, 0,
                     700, // FW_BOLD
                     0, 0, 0,
                     1, // DEFAULT_CHARSET
-                    0, 0, 4, 0,
+                    0, 0, 5, 0, // CLEARTYPE_QUALITY
                     font_name.as_ptr(),
                 );
                 let old_font = SelectObject(hdc, h_font);
                 SetBkMode(hdc, TRANSPARENT);
 
                 // 3. Text & Color
-                // বাংলা = Emerald/Mint (0x0099D334), English = Sky Blue (0x00F8BD38)
+                // BN = Emerald/Mint (0x0099D334), EN = Sky Blue (0x00F8BD38)
                 let text_color = if is_bangla { 0x0099D334 } else { 0x00F8BD38 };
                 SetTextColor(hdc, text_color);
 
-                let badge_text = if is_bangla { "বাংলা" } else { "EN" };
+                let badge_text = if is_bangla { "BN" } else { "EN" };
                 let w_text = to_wide_string(badge_text);
                 let mut draw_rc = rect;
 
