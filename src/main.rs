@@ -30,6 +30,8 @@ fn main() {
         engine.typing_style = config.typing_style;
     }
 
+    let start_hidden = config.start_hidden;
+
     print_welcome_banner(&config);
 
     // Save active config in hook
@@ -38,7 +40,12 @@ fn main() {
         *cfg_guard = Some(config);
     }
 
-    // Register clean Ctrl+C / close handler
+    let args: Vec<String> = std::env::args().collect();
+    let is_hidden_flag = args.iter().any(|a| a == "--hidden" || a == "--tray" || a == "-h");
+
+    if start_hidden || is_hidden_flag {
+        hide_console_window();
+    }
     unsafe {
         SetConsoleCtrlHandler(Some(ctrl_handler), 1);
     }

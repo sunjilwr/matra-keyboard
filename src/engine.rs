@@ -145,7 +145,7 @@ impl Engine {
                 // Send Reph (\u{09B0}\u{09CD}) followed by the consonant
                 send_unicode_string("\u{09B0}\u{09CD}");
                 send_unicode_string(cons);
-                self.last_typed = LastTyped::Consonant(cons);
+                self.last_typed = LastTyped::Other;
                 return true;
             }
         }

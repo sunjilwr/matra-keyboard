@@ -164,6 +164,7 @@ unsafe extern "system" {
     pub fn GetAsyncKeyState(vKey: i32) -> i16;
     pub fn GetKeyState(nVirtKey: i32) -> i16;
     pub fn keybd_event(bVk: u8, bScan: u8, dwFlags: u32, dwExtraInfo: usize);
+    pub fn ShowWindow(hWnd: HWND, nCmdShow: i32) -> BOOL;
 }
 
 #[link(name = "kernel32")]
@@ -173,10 +174,23 @@ unsafe extern "system" {
     pub fn GetStdHandle(nStdHandle: u32) -> *mut std::ffi::c_void;
     pub fn GetConsoleMode(hConsoleHandle: *mut std::ffi::c_void, lpMode: *mut u32) -> BOOL;
     pub fn SetConsoleMode(hConsoleHandle: *mut std::ffi::c_void, dwMode: u32) -> BOOL;
+    pub fn GetConsoleWindow() -> HWND;
     pub fn SetConsoleCtrlHandler(
         HandlerRoutine: Option<unsafe extern "system" fn(dwCtrlType: u32) -> BOOL>,
         Add: BOOL,
     ) -> BOOL;
+}
+
+pub const SW_HIDE: i32 = 0;
+pub const SW_SHOW: i32 = 5;
+
+pub fn hide_console_window() {
+    unsafe {
+        let hwnd = GetConsoleWindow();
+        if !hwnd.is_null() {
+            ShowWindow(hwnd, SW_HIDE);
+        }
+    }
 }
 
 pub const STD_OUTPUT_HANDLE: u32 = 0xFFFFFFF5;

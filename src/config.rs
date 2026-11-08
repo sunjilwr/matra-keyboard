@@ -26,6 +26,7 @@ pub struct AppConfig {
     pub shortcut: ShortcutKey,
     pub sound_enabled: bool,
     pub typing_style: TypingStyle,
+    pub start_hidden: bool,
 }
 
 impl Default for AppConfig {
@@ -34,6 +35,7 @@ impl Default for AppConfig {
             shortcut: ShortcutKey::CtrlBackslash,
             sound_enabled: true,
             typing_style: TypingStyle::Classic, // By default allow both classic (ি+ক) and modern (ক+ি)
+            start_hidden: false,
         }
     }
 }
@@ -77,6 +79,9 @@ impl AppConfig {
                                 "modern" => TypingStyle::Modern,
                                 _ => TypingStyle::Classic,
                             };
+                        }
+                        "start_hidden" | "hidden" => {
+                            config.start_hidden = matches!(v.to_lowercase().as_str(), "true" | "1" | "yes" | "on");
                         }
                         _ => {}
                     }
@@ -122,10 +127,14 @@ sound = {}
 #   Classic = Supports typing pre-base Kars before Consonant (ি + ক = কি) as well as Modern
 #   Modern  = Pure Unicode style (ক + ি = কি)
 typing_style = {}
+
+# Run silently in background without console window (true / false)
+start_hidden = {}
 "#,
             shortcut_str,
             if self.sound_enabled { "true" } else { "false" },
-            typing_style_str
+            typing_style_str,
+            if self.start_hidden { "true" } else { "false" }
         );
 
         let _ = fs::write(Self::CONFIG_FILE, content);
