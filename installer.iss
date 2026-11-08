@@ -4,7 +4,7 @@
 #define MyAppName "Borno"
 #define MyAppVersion "1.0.0"
 #define MyAppPublisher "Sunjil"
-#define MyAppURL "https://github.com/wrsunjil/bnkeyboard"
+#define MyAppURL "https://github.com/wrsunjil/borno-keyboard"
 #define MyAppExeName "borno.exe"
 
 [Setup]

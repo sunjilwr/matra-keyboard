@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/wrsunjil/bnkeyboard/releases"><img src="https://img.shields.io/badge/Download-Installer%20v1.0.0-emerald?style=for-the-badge&logo=windows" alt="Download Borno" /></a>
+  <a href="https://github.com/wrsunjil/borno-keyboard/releases"><img src="https://img.shields.io/badge/Download-Installer%20v1.0.0-emerald?style=for-the-badge&logo=windows" alt="Download Borno" /></a>
   <img src="https://img.shields.io/badge/Language-Rust-orange?style=for-the-badge&logo=rust" alt="Rust" />
   <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="MIT License" />
 </p>
@@ -48,14 +48,14 @@
 ## 💾 ইনস্টলেশন গাইড (Download & Installation)
 
 ### সহজ ইনস্টলেশন (Recommended):
-1. [Releases](https://github.com/wrsunjil/bnkeyboard/releases) সেকশন থেকে **`BornoSetup-v1.0.0.exe`** ডাউনলোড করুন।
+1. [Releases](https://github.com/wrsunjil/borno-keyboard/releases) সেকশন থেকে **`BornoSetup-v1.0.0.exe`** ডাউনলোড করুন।
 2. ইনস্টলারে ডাবল ক্লিক করে ইনস্টল করুন। 
 3. ব্যস! স্টার্টআপেই বর্ণ স্বয়ংক্রিয়ভাবে সিস্টেম ট্রে-তে প্রস্তুত থাকবে।
 
 ### সোর্স থেকে বিল্ড করতে চাইলে (For Developers):
 ```bash
-git clone https://github.com/wrsunjil/bnkeyboard.git
-cd bnkeyboard
+git clone https://github.com/wrsunjil/borno-keyboard.git
+cd borno-keyboard
 cargo build --release
 ```
 তৈরি হওয়া `target/release/borno.exe` সরাসরি যেকোনো জায়গায় নিয়ে চালানো যাবে।
