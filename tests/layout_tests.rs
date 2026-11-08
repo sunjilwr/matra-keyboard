@@ -252,4 +252,30 @@ mod tests {
         assert!(engine.handle_key_down(0x4A, false, false, false));
         assert!(!engine.link_active);
     }
+
+    #[test]
+    fn test_per_window_state_manager() {
+        use borno::hook::WindowStateManager;
+
+        let mut wsm = WindowStateManager::new(true);
+
+        // 1. User focuses Window 101 (e.g. Word) -> defaults to English
+        assert_eq!(wsm.sync_active_window(101), Some(KeyboardMode::English));
+
+        // 2. User toggles to UniBijoy in Window 101
+        wsm.set_mode_for_window(101, KeyboardMode::UniBijoy);
+
+        // 3. User switches to Window 202 (e.g. VS Code / Terminal) -> automatically English!
+        assert_eq!(wsm.sync_active_window(202), Some(KeyboardMode::English));
+
+        // 4. User switches back to Window 101 (Word) -> automatically restores UniBijoy!
+        assert_eq!(wsm.sync_active_window(101), Some(KeyboardMode::UniBijoy));
+
+        // 5. Still in Window 101 -> returns None (no change needed)
+        assert_eq!(wsm.sync_active_window(101), None);
+
+        // 6. Test with disabled mode (global) -> always returns None
+        let mut disabled_wsm = WindowStateManager::new(false);
+        assert_eq!(disabled_wsm.sync_active_window(101), None);
+    }
 }

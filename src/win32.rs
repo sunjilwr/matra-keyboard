@@ -221,6 +221,27 @@ unsafe extern "system" {
         fuLoad: u32,
     ) -> *mut std::ffi::c_void;
     pub fn LoadIconW(hInstance: HINSTANCE, lpIconName: *const u16) -> *mut std::ffi::c_void;
+    pub fn GetForegroundWindow() -> HWND;
+    pub fn GetAncestor(hwnd: HWND, gaFlags: u32) -> HWND;
+    pub fn IsWindow(hWnd: HWND) -> BOOL;
+}
+
+pub const GA_ROOT: u32 = 2;
+
+/// Get top-level window handle of current active foreground application
+pub fn get_active_window_handle() -> usize {
+    unsafe {
+        let fg = GetForegroundWindow();
+        if fg.is_null() {
+            return 0;
+        }
+        let root = GetAncestor(fg, GA_ROOT);
+        if root.is_null() {
+            fg as usize
+        } else {
+            root as usize
+        }
+    }
 }
 
 #[repr(C)]

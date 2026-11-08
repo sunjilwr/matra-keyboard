@@ -39,6 +39,12 @@ pub unsafe extern "system" fn tray_window_proc(
                     let new_mode = engine.toggle_mode();
                     print_mode_banner(new_mode);
                     update_tray_tooltip(hwnd, new_mode);
+
+                    let active = get_active_window_handle();
+                    if active != 0 {
+                        let mut wsm = crate::hook::WINDOW_STATE_MGR.lock().unwrap();
+                        wsm.set_mode_for_window(active, new_mode);
+                    }
                 }
                 // Right click or Context Menu: show popup menu
                 0x0205 | 0x007B => { // WM_RBUTTONUP = 0x0205, WM_CONTEXTMENU = 0x007B
@@ -58,6 +64,12 @@ pub unsafe extern "system" fn tray_window_proc(
                     let new_mode = engine.toggle_mode();
                     print_mode_banner(new_mode);
                     update_tray_tooltip(hwnd, new_mode);
+
+                    let active = get_active_window_handle();
+                    if active != 0 {
+                        let mut wsm = crate::hook::WINDOW_STATE_MGR.lock().unwrap();
+                        wsm.set_mode_for_window(active, new_mode);
+                    }
                 }
                 ID_TRAY_CONFIG => {
                     open_file_in_default_app("config.ini");

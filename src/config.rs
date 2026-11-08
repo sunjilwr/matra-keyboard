@@ -27,6 +27,7 @@ pub struct AppConfig {
     pub sound_enabled: bool,
     pub typing_style: TypingStyle,
     pub start_hidden: bool,
+    pub per_window_mode: bool,
 }
 
 impl Default for AppConfig {
@@ -36,6 +37,7 @@ impl Default for AppConfig {
             sound_enabled: true,
             typing_style: TypingStyle::Classic, // By default allow both classic (ি+ক) and modern (ক+ি)
             start_hidden: false,
+            per_window_mode: true, // Independent keyboard state per application window
         }
     }
 }
@@ -82,6 +84,9 @@ impl AppConfig {
                         }
                         "start_hidden" | "hidden" => {
                             config.start_hidden = matches!(v.to_lowercase().as_str(), "true" | "1" | "yes" | "on");
+                        }
+                        "per_window" | "per_window_mode" | "independent_window" => {
+                            config.per_window_mode = matches!(v.to_lowercase().as_str(), "true" | "1" | "yes" | "on");
                         }
                         _ => {}
                     }
@@ -130,11 +135,18 @@ typing_style = {}
 
 # Run silently in background without console window (true / false)
 start_hidden = {}
+
+# Remember language independently per application window (true / false)
+#   true  = Each app remembers its own language (e.g. Word=বাংলা, Chrome=English).
+#           New apps safely open in English. (Recommended)
+#   false = Single global mode across all applications.
+per_window_mode = {}
 "#,
             shortcut_str,
             if self.sound_enabled { "true" } else { "false" },
             typing_style_str,
-            if self.start_hidden { "true" } else { "false" }
+            if self.start_hidden { "true" } else { "false" },
+            if self.per_window_mode { "true" } else { "false" }
         );
 
         let _ = fs::write(Self::CONFIG_FILE, content);

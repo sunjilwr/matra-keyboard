@@ -32,11 +32,15 @@ fn main() {
     // Load or create user configuration (config.ini)
     let config = AppConfig::load_or_create();
 
-    // Apply config to typing engine
+    // Apply config to typing engine and window manager
     {
         let mut engine = ENGINE.lock().unwrap();
         engine.sound_enabled = config.sound_enabled;
         engine.typing_style = config.typing_style;
+    }
+    {
+        let mut wsm = hook::WINDOW_STATE_MGR.lock().unwrap();
+        wsm.enabled = config.per_window_mode;
     }
 
     print_welcome_banner(&config);
@@ -103,6 +107,7 @@ fn print_welcome_banner(config: &AppConfig) {
     println!("  \x1b[1mActive Shortcut:\x1b[0m \x1b[1;33m{}\x1b[0m (Change anytime in config.ini)", shortcut_display);
     println!("  \x1b[1mTyping Style:\x1b[0m    \x1b[1;36m{}\x1b[0m", typing_style_display);
     println!("  \x1b[1mAudio Feedback:\x1b[0m  {}", if config.sound_enabled { "\x1b[1;32mEnabled (Beep)\x1b[0m" } else { "\x1b[90mDisabled\x1b[0m" });
+    println!("  \x1b[1mPer-App Language:\x1b[0m {}", if config.per_window_mode { "\x1b[1;32mEnabled (Auto-remembers per app)\x1b[0m" } else { "\x1b[90mDisabled (Global)\x1b[0m" });
     println!();
     println!("  \x1b[1mUniBijoy Quick Typing Cheat-Sheet:\x1b[0m");
     println!("    • \x1b[36mস্বরবর্ণ:\x1b[0m Shift+F=অ, g+f=আ, g+d=ই, g+D=ঈ, g+s=উ, g+S=ঊ, g+a=ঋ, g+c=এ, g+C=ঐ, g+x=ও, g+X=ঔ");

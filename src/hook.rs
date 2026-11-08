@@ -1,13 +1,64 @@
 // Low-Level Windows Keyboard Hook (WH_KEYBOARD_LL)
 // Intercepts keys globally across all Windows applications and routes them to the UniBijoy engine.
 
-use std::sync::Mutex;
+use std::collections::HashMap;
+use std::sync::{LazyLock, Mutex};
 use crate::config::{AppConfig, ShortcutKey};
 use crate::engine::{Engine, KeyboardMode};
 use crate::win32::*;
 
+pub struct WindowStateManager {
+    pub enabled: bool,
+    pub last_active_hwnd: usize,
+    pub window_modes: HashMap<usize, KeyboardMode>,
+}
+
+impl WindowStateManager {
+    pub fn new(enabled: bool) -> Self {
+        Self {
+            enabled,
+            last_active_hwnd: 0,
+            window_modes: HashMap::new(),
+        }
+    }
+
+    /// Sync active mode with currently focused window.
+    /// Returns Some(target_mode) if the active window changed mode.
+    pub fn sync_active_window(&mut self, current_hwnd: usize) -> Option<KeyboardMode> {
+        if !self.enabled || current_hwnd == 0 {
+            return None;
+        }
+
+        if current_hwnd != self.last_active_hwnd {
+            self.last_active_hwnd = current_hwnd;
+
+            // Retain valid windows if map gets large
+            if self.window_modes.len() > 100 {
+                self.window_modes.retain(|&hwnd, _| unsafe { IsWindow(hwnd as HWND) != 0 });
+            }
+
+            // If window not yet in map, default to English for maximum safety
+            let mode = *self.window_modes.entry(current_hwnd).or_insert(KeyboardMode::English);
+            Some(mode)
+        } else {
+            None
+        }
+    }
+
+    /// Update mode for current window
+    pub fn set_mode_for_window(&mut self, current_hwnd: usize, mode: KeyboardMode) {
+        if self.enabled && current_hwnd != 0 {
+            self.last_active_hwnd = current_hwnd;
+            self.window_modes.insert(current_hwnd, mode);
+        }
+    }
+}
+
 pub static ENGINE: Mutex<Engine> = Mutex::new(Engine::new());
 pub static CONFIG: Mutex<Option<AppConfig>> = Mutex::new(None);
+pub static WINDOW_STATE_MGR: LazyLock<Mutex<WindowStateManager>> = LazyLock::new(|| {
+    Mutex::new(WindowStateManager::new(true))
+});
 static mut HOOK_HANDLE: HHOOK = std::ptr::null_mut();
 
 /// Low-level keyboard hook callback procedure
@@ -32,6 +83,22 @@ pub unsafe extern "system" fn low_level_keyboard_proc(
 
     let is_ctrl = is_key_pressed(VK_CONTROL);
     let is_alt = is_key_pressed(VK_MENU);
+
+    // Sync active mode with currently focused window (Per-Window State)
+    let current_hwnd = get_active_window_handle();
+    {
+        let mut wsm = WINDOW_STATE_MGR.lock().unwrap();
+        if let Some(target_mode) = wsm.sync_active_window(current_hwnd) {
+            let mut engine = ENGINE.lock().unwrap();
+            if engine.mode != target_mode {
+                engine.set_mode(target_mode);
+                let tray_hwnd = crate::tray::get_tray_hwnd();
+                if !tray_hwnd.is_null() {
+                    crate::tray::update_tray_tooltip(tray_hwnd, target_mode);
+                }
+            }
+        }
+    }
 
     let engine_mode = {
         let engine = ENGINE.lock().unwrap();
@@ -70,6 +137,12 @@ pub unsafe extern "system" fn low_level_keyboard_proc(
             let mut engine = ENGINE.lock().unwrap();
             let new_mode = engine.toggle_mode();
             print_mode_banner(new_mode);
+
+            // Record this mode for the current active window
+            {
+                let mut wsm = WINDOW_STATE_MGR.lock().unwrap();
+                wsm.set_mode_for_window(current_hwnd, new_mode);
+            }
 
             // Update tray tooltip if tray window exists
             let hwnd = crate::tray::get_tray_hwnd();

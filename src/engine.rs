@@ -93,6 +93,18 @@ impl Engine {
         self.mode
     }
 
+    /// Set mode explicitly (e.g. when switching between applications).
+    /// Does not play audio beep, making window switches smooth and silent.
+    pub fn set_mode(&mut self, mode: KeyboardMode) {
+        if self.mode != mode {
+            self.reset_state();
+            self.mode = mode;
+            if mode == KeyboardMode::UniBijoy {
+                turn_caps_lock_off();
+            }
+        }
+    }
+
     pub fn reset_state(&mut self) {
         self.link_active = false;
         self.pending_kar = None;
