@@ -1,49 +1,64 @@
-# ⌨️ Borno (বর্ণ) - Native UniBijoy & English Keyboard
+# ⌨️ Borno (বর্ণ) - Ultra-Lightweight UniBijoy & English Keyboard
 
 <p align="center">
-  <img src="assets/logo.png" alt="Borno Logo" width="160" height="160" style="border-radius: 20%;" />
+  <img src="assets/logo.png" alt="Borno Logo" width="128" height="128" />
   <br>
-  <b>Borno (বর্ণ)</b> - উইন্ডোজের জন্য সম্পূর্ণ <b>Pure Rust</b> দিয়ে তৈরি আল্ট্রা-লাইট, সুপার-ফাস্ট সিস্টেম-ওয়াইড কীবোর্ড।
+  <b>Borno (বর্ণ)</b> হলো উইন্ডোজের জন্য সম্পূর্ণ <b>Pure Rust</b> দিয়ে তৈরি একটি আধুনিক, দ্রুতগতির এবং ওপেন সোর্স সিস্টেম-ওয়াইড বাংলা কীবোর্ড।
+  <br>
+  <i>Zero external crates • 0ms latency • No bloatware • Pure Win32 API</i>
+</p>
+
+<p align="center">
+  <a href="https://github.com/wrsunjil/bnkeyboard/releases"><img src="https://img.shields.io/badge/Download-Installer%20v1.0.0-emerald?style=for-the-badge&logo=windows" alt="Download Borno" /></a>
+  <img src="https://img.shields.io/badge/Language-Rust-orange?style=for-the-badge&logo=rust" alt="Rust" />
+  <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="MIT License" />
 </p>
 
 ---
 
-## ✨ প্রধান বৈশিষ্ট্যসমূহ (Features)
+## ✨ প্রধান বৈশিষ্ট্যসমূহ (Key Features)
 
-1. **শুধুমাত্র English ও UniBijoy (Unicode Bijoy)**:
-   - কোনো অপ্রয়োজনীয় লেআউটের ঝামেলা নেই।
-   - ডিফল্ট অবস্থায় সরাসরি English পাস-থ্রু (0ms লেটেন্সি)।
+1. **⚡ আল্ট্রা-লাইট ও সুপার-ফাস্ট (Pure Rust & Win32):**
+   - কোনো ভারী ফ্রেমওয়ার্ক বা অতিরিক্ত ডিপেনডেন্সি নেই। সাইজ মাত্র কয়েকশো কিলোবাইট!
+   - সিস্টেমের মেমোরি ও সিপিইউ ব্যবহার প্রায় ০%।
 
-2. **সংঘাতমুক্ত ল্যাঙ্গুয়েজ সুইচ শর্টকাট (Conflict-Free Shortcuts)**:
-   - **`Ctrl + \`** (ডিফল্ট ও রিকমেন্ডেড): উইন্ডোজের কোনো অ্যাপ্লিকেশনের সাথে কনফ্লিক্ট করে না।
-   - **`Ctrl + F12`**: ব্রাউজার DevTools বা Inspector ওপেন না করেই নিরাপদ টগল।
+2. **🖥️ কার্সরের পাশে আধুনিক ফ্লোটিং ব্যাজ (Sleek Floating OSD):**
+   - ভাষা পরিবর্তনের সময় কোনো শব্দ না করে কার্সরের ঠিক পাশে অত্যন্ত দৃষ্টিনন্দন **`BN`** (মিন্ট গ্রিন) অথবা **`EN`** (স্কাই ব্লু) পিল ব্যাজ চোখের পলকে ভেসে উঠে মিলিয়ে যাবে।
 
-3. **অডিও কনফার্মেশন (Audio Feedback)**:
-   - 🎵 **High Beep (880 Hz)** = বাংলা (UniBijoy) চালু
-   - 🎵 **Low Beep (440 Hz)** = English চালু
+3. **🔄 অ্যাপ অনুযায়ী স্বাধীন ভাষা (Per-Window Independent State):**
+   - এক সফটওয়্যার থেকে অন্য সফটওয়্যারে গেলে আগের ভাষা স্বয়ংক্রিয়ভাবে মনে রাখে।
+   - যেমন: MS Word-এ বাংলা লিখে ব্রাউজার বা VS Code-এ গেলে স্বয়ংক্রিয়ভাবে ইংরেজি থাকবে। আবার Word-এ ফিরলে নিজে নিজেই বাংলা ফিরে আসবে!
 
-4. **স্মার্ট বাংলা টাইপিং ইঞ্জিন (Fixed & Tested)**:
-   - **"সেই"** = `n` (স) + `c` (ে) + `g` + `d` (ই)
-   - **"কর্ম"** = `j` (ক) + `m` (ম) + `Shift+A` (বা `j` + `Shift+A` + `m`)
-   - **ক্যাপস লক প্রোটেকশন:** টাইপ করার সময় ভুল করে ক্যাপস লকে চাপ লাগলেও কীবোর্ড লক হবে না।
-   - **যুক্তাক্ষর:** বর্ণ + `g` + বর্ণ (যেমন: `j + g + j` = ক্ক, `k + g + k` = ত্ত)
-   - **স্বয়ংক্রিয় ব্যাকগ্রাউন্ড মোড:** `start_hidden = true` দিয়ে সম্পূর্ণ ব্যাকগ্রাউন্ডে চালানো যায়।
+4. **🛡️ সংঘাতমুক্ত শর্টকাট (Conflict-Free Shortcut):**
+   - **`Ctrl + \`** (ডিফল্ট ও রিকমেন্ডেড): উইন্ডোজের কোনো সফটওয়্যার বা ব্রাউজারের সাথে কনফ্লিক্ট করে না।
+   - এছাড়াও `Ctrl+F12`, `F12`, `Alt+\`, বা `Ctrl+Space` নির্বাচন করার সুবিধা।
 
-5. **যেকোনো পিসিতে ইনস্টলেশন (Any Computer Ready)**:
-   - সম্পূর্ণ রেডিমেড **Setup Installer** (`dist/BornoSetup-v1.0.0.exe`) তৈরি করা হয়েছে।
-   - যেকোনো কম্পিউটারে পেনড্রাইভে নিয়ে বা ডাউনলোড করে সাধারণ সফটওয়্যারের মতো ১-ক্লিকে ইনস্টল করা যায়!
+5. **🎯 পারফেক্ট ইউনিকোড বিজয় লেআউট (Accurate UniBijoy Engine):**
+   - **"ফ্রেন্ডলি"** = `Shift+R` (ফ) + `z` (্র) + `c` (ে) + `b` (ন) + `g` (্) + `e` (ড) + `Shift+V` (ল) + `d` (ি)
+   - **"কর্ম"** = `j` (ক) + `m` (ম) + `Shift+A` (র্) — স্বাভাবিক টাইপিং অভ্যাসের সাথে শতভাগ সামঞ্জস্যপূর্ণ।
+   - **"সেই"** = `n` (স) + `c` (ে) + `g` + `d` (ই)।
+   - **ক্যাপস লক সুরক্ষা:** অসাবধানতাবশত ক্যাপস লক চাপ লাগলেও বাংলা টাইপিং নষ্ট হবে না।
+
+6. **📌 সিস্টেম ট্রে ও স্টার্টআপ সাপোর্ট (System Tray & Auto-Start):**
+   - কোনো কালো কনসোল উইন্ডো ছাড়া নিঃশব্দে ব্যাকগ্রাউন্ডে ও সিস্টেম ট্রে-তে চলবে।
+   - ট্রে আইকনে এক ক্লিকেই ভাষা বদল, সেটিংস ও প্রস্থান করার সুবিধা।
 
 ---
 
-## 💾 ইনস্টলেশন গাইড (How to Install on Any PC)
+## 💾 ইনস্টলেশন গাইড (Download & Installation)
 
-### ১. ইনস্টলার দিয়ে ইনস্টল করতে (সবচেয়ে সহজ):
-`dist\BornoSetup-v1.0.0.exe` ফাইলটিতে ডাবল ক্লিক করুন:
-- ডেস্কটপে ও স্টার্ট মেন্যুতে সুন্দর Borno আইকন সহ শর্টকাট তৈরি হবে।
-- "Automatically start Borno when Windows starts" অপশন সিলেক্ট করলে পিসি চালু হলেই কীবোর্ড রেডি থাকবে।
+### সহজ ইনস্টলেশন (Recommended):
+1. [Releases](https://github.com/wrsunjil/bnkeyboard/releases) সেকশন থেকে **`BornoSetup-v1.0.0.exe`** ডাউনলোড করুন।
+2. ইনস্টলারে ডাবল ক্লিক করে ইনস্টল করুন। 
+3. ব্যস! স্টার্টআপেই বর্ণ স্বয়ংক্রিয়ভাবে সিস্টেম ট্রে-তে প্রস্তুত থাকবে।
 
-### ২. পোর্টেবল চালাতে (ইনস্টল ছাড়া):
-সরাসরি `run.bat` অথবা `target\release\borno.exe` রান করলেই চলবে।
+### সোর্স থেকে বিল্ড করতে চাইলে (For Developers):
+```bash
+git clone https://github.com/wrsunjil/bnkeyboard.git
+cd bnkeyboard
+cargo build --release
+```
+তৈরি হওয়া `target/release/borno.exe` সরাসরি যেকোনো জায়গায় নিয়ে চালানো যাবে।
 
 ---
 
@@ -60,7 +75,8 @@
 | **ও, ঔ** | `g + x`, `g + Shift+X` |
 | **কার চিহ্ন (া, ি, ী...)** | `f`=া, `d`=ি, `D`=ী, `s`=ু, `S`=ূ, `a`=ৃ, `c`=ে, `C`=ৈ, `x`=ো, `X`=ৌ |
 | **রেফ (র্)** | `Shift + A` (যেমন: `j + m + Shift+A` = **কর্ম**) |
-| **র-ফলা / য-ফলা** | `z` = ্র (ক্র), `Shift + Z` = ্য (ক্য) |
+| **র-ফলা / য-ফলা** | `z` = ্র (যেমন: `Shift+R + z` = **ফ্র**), `Shift + Z` = ্য |
+| **যুক্তাক্ষর** | বর্ণ + `g` + বর্ণ (যেমন: `j + g + j` = **ক্ক**, `b + g + e` = **ন্ড**) |
 | **দাঁড়ি (।)** | `Shift + G` |
 | **টাকা (৳)** | `Shift + 4` |
 | **খন্ড-ত (ৎ)** | `Shift + 7` |
@@ -71,10 +87,22 @@
 
 ## ⚙️ কনফিগারেশন (`config.ini`)
 
-`config.ini` ফাইলে সেটিংস সহজেই কাস্টমাইজ করা যায়:
+অ্যাপের সাথে থাকা `config.ini` ফাইলে সেটিংস পরিবর্তন করা যায়:
 ```ini
-shortcut = Ctrl+\      # অপশন: Ctrl+\, Ctrl+F12, F12, Alt+\, Ctrl+Space
-sound = true           # অডিও বীপ অন/অফ (true / false)
-typing_style = Classic # Classic বা Modern
-start_hidden = false   # উইন্ডো ছাড়া ব্যাকগ্রাউন্ডে চালাতে true করুন
+shortcut = Ctrl+\        # টগল শর্টকাট (Ctrl+\, Ctrl+F12, F12, Alt+\, Ctrl+Space)
+sound = false            # শব্দ সম্পূর্ণ নীরব রাখতে false (ডিফল্ট: false)
+osd_badge = true         # কার্সরের পাশে ভাসমান BN/EN ব্যাজ (ডিফল্ট: true)
+per_window_mode = true   # প্রতি অ্যাপে আলাদা ভাষা মনে রাখা (ডিফল্ট: true)
+typing_style = Classic   # Classic (ি+ক = কি) বা Modern (ক+ি = কি)
+start_hidden = true      # কনসোল উইন্ডো ছাড়া সরাসরি ব্যাকগ্রাউন্ডে চালু
 ```
+
+---
+
+## 🤝 অবদান (Contributing)
+
+এটি একটি ওপেন সোর্স প্রজেক্ট। যেকোনো বাগ রিপোর্ট, ফিচার রিকোয়েস্ট বা Pull Request সাদরে গ্রহণযোগ্য!
+
+## 📜 লাইসেন্স (License)
+
+এই প্রজেক্টটি [MIT License](LICENSE) এর আওতাধীন।
