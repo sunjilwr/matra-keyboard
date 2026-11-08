@@ -86,6 +86,12 @@ impl Engine {
             return false;
         }
 
+        // Ignore modifier keys alone (Shift, Ctrl, Alt, CapsLock, Win).
+        // Crucial: They must NEVER reset last_typed, because user presses Shift BEFORE pressing 'A'!
+        if is_modifier_key(vk) {
+            return false;
+        }
+
         // Allow system shortcuts (Ctrl+C, Ctrl+V, Win+Key, Alt+Tab, etc.) to pass through untouched
         let is_alt_gr = is_ctrl && is_alt;
         if (is_ctrl && !is_alt_gr) || (is_alt && !is_alt_gr) {
@@ -245,4 +251,15 @@ impl Engine {
             self.link_active = false;
         }
     }
+}
+
+fn is_modifier_key(vk: u32) -> bool {
+    matches!(
+        vk,
+        0x10 | 0xA0 | 0xA1 // Shift (Generic, Left, Right)
+        | 0x11 | 0xA2 | 0xA3 // Ctrl (Generic, Left, Right)
+        | 0x12 | 0xA4 | 0xA5 // Alt (Generic, Left, Right)
+        | 0x14 // Caps Lock
+        | 0x5B | 0x5C // Win keys
+    )
 }

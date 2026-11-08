@@ -161,12 +161,18 @@ mod tests {
         engine.mode = KeyboardMode::UniBijoy;
         engine.sound_enabled = false;
 
-        // Type 'j' (ক)
+        // 1. Type 'j' (ক)
         assert!(engine.handle_key_down(0x4A, false, false, false));
-        // Type 'm' (ম)
+        // 2. Type 'm' (ম)
         assert!(engine.handle_key_down(0x4D, false, false, false));
-        // Type Shift + A (Reph) -> triggers Reph after consonant handler
+        // 3. User presses physical Shift key (VK_SHIFT = 0x10)
+        assert!(!engine.handle_key_down(0x10, true, false, false));
+        // Verify last_typed is still Consonant("ম") even after Shift key was pressed!
+        assert_eq!(engine.last_typed, bnkeyboard::engine::LastTyped::Consonant("ম"));
+        // 4. Type 'A' (0x41) with Shift held down -> triggers Reph replacement!
         assert!(engine.handle_key_down(0x41, true, false, false));
+        // Verify state after Reph
+        assert_eq!(engine.last_typed, bnkeyboard::engine::LastTyped::Other);
     }
 
     #[test]
