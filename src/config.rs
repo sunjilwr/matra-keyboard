@@ -1,0 +1,134 @@
+// Configuration management for bnkeyboard
+// Reads and writes user preferences to a simple, human-editable 'config.ini' file.
+
+use std::fs;
+use std::path::Path;
+
+#[derive(Debug, Clone)]
+pub enum ShortcutKey {
+    CtrlBackslash,  // Ctrl + \ (Default)
+    CtrlF12,        // Ctrl + F12
+    F12,            // F12 alone (Classic Avro style)
+    AltBackslash,   // Alt + \
+    CtrlSpace,      // Ctrl + Space
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TypingStyle {
+    /// Modern Unicode style: Consonant followed by Kar (ক + ি = কি)
+    Modern,
+    /// Classic Bijoy style: Supports typing Kar before Consonant (ি + ক = কি) as well as Modern
+    Classic,
+}
+
+#[derive(Debug, Clone)]
+pub struct AppConfig {
+    pub shortcut: ShortcutKey,
+    pub sound_enabled: bool,
+    pub typing_style: TypingStyle,
+}
+
+impl Default for AppConfig {
+    fn default() -> Self {
+        Self {
+            shortcut: ShortcutKey::CtrlBackslash,
+            sound_enabled: true,
+            typing_style: TypingStyle::Classic, // By default allow both classic (ি+ক) and modern (ক+ি)
+        }
+    }
+}
+
+impl AppConfig {
+    const CONFIG_FILE: &'static str = "config.ini";
+
+    /// Load config from file or create default if not present
+    pub fn load_or_create() -> Self {
+        if !Path::new(Self::CONFIG_FILE).exists() {
+            let default_cfg = Self::default();
+            default_cfg.save_to_file();
+            return default_cfg;
+        }
+
+        let mut config = Self::default();
+        if let Ok(content) = fs::read_to_string(Self::CONFIG_FILE) {
+            for line in content.lines() {
+                let trimmed = line.trim();
+                if trimmed.is_empty() || trimmed.starts_with('#') || trimmed.starts_with(';') {
+                    continue;
+                }
+                if let Some((key, val)) = trimmed.split_once('=') {
+                    let k = key.trim().to_lowercase();
+                    let v = val.trim();
+                    match k.as_str() {
+                        "shortcut" => {
+                            config.shortcut = match v.to_lowercase().as_str() {
+                                "ctrl+f12" | "ctrl-f12" => ShortcutKey::CtrlF12,
+                                "f12" => ShortcutKey::F12,
+                                "alt+\\" | "alt-\\" => ShortcutKey::AltBackslash,
+                                "ctrl+space" | "ctrl-space" => ShortcutKey::CtrlSpace,
+                                _ => ShortcutKey::CtrlBackslash,
+                            };
+                        }
+                        "sound" => {
+                            config.sound_enabled = !matches!(v.to_lowercase().as_str(), "false" | "0" | "no" | "off");
+                        }
+                        "typing_style" => {
+                            config.typing_style = match v.to_lowercase().as_str() {
+                                "modern" => TypingStyle::Modern,
+                                _ => TypingStyle::Classic,
+                            };
+                        }
+                        _ => {}
+                    }
+                }
+            }
+        }
+        config
+    }
+
+    /// Save current configuration to config.ini
+    pub fn save_to_file(&self) {
+        let shortcut_str = match self.shortcut {
+            ShortcutKey::CtrlBackslash => "Ctrl+\\",
+            ShortcutKey::CtrlF12 => "Ctrl+F12",
+            ShortcutKey::F12 => "F12",
+            ShortcutKey::AltBackslash => "Alt+\\",
+            ShortcutKey::CtrlSpace => "Ctrl+Space",
+        };
+
+        let typing_style_str = match self.typing_style {
+            TypingStyle::Modern => "Modern",
+            TypingStyle::Classic => "Classic",
+        };
+
+        let content = format!(
+r#"# ====================================================================
+# bnkeyboard Configuration File (ইউজার কনফিগারেশন)
+# ====================================================================
+
+# Language switch shortcut (English <-> UniBijoy)
+# Available options:
+#   Ctrl+\       (Recommended - Zero conflicts with other apps)
+#   Ctrl+F12     (Safe function key)
+#   F12          (Avro legacy style)
+#   Alt+\        (Alt + Backslash)
+#   Ctrl+Space   (Note: may conflict with code editors)
+shortcut = {}
+
+# Audio beep confirmation when switching language (true / false)
+sound = {}
+
+# Typing style:
+#   Classic = Supports typing pre-base Kars before Consonant (ি + ক = কি) as well as Modern
+#   Modern  = Pure Unicode style (ক + ি = কি)
+typing_style = {}
+"#,
+            shortcut_str,
+            if self.sound_enabled { "true" } else { "false" },
+            typing_style_str
+        );
+
+        let _ = fs::write(Self::CONFIG_FILE, content);
+    }
+}
+

@@ -1,0 +1,187 @@
+// Unit tests for UniBijoy layout mappings and engine rules
+
+#[cfg(test)]
+mod tests {
+    use bnkeyboard::layout::*;
+    use bnkeyboard::engine::{Engine, KeyboardMode};
+
+    #[test]
+    fn test_vowels_via_link_key() {
+        assert_eq!(map_link_vowel(0x46, false), Some("আ"));
+        assert_eq!(map_link_vowel(0x44, false), Some("ই"));
+        assert_eq!(map_link_vowel(0x44, true),  Some("ঈ"));
+        assert_eq!(map_link_vowel(0x53, false), Some("উ"));
+        assert_eq!(map_link_vowel(0x53, true),  Some("ঊ"));
+        assert_eq!(map_link_vowel(0x41, false), Some("ঋ"));
+        assert_eq!(map_link_vowel(0x43, false), Some("এ"));
+        assert_eq!(map_link_vowel(0x43, true),  Some("ঐ"));
+        assert_eq!(map_link_vowel(0x58, false), Some("ও"));
+        assert_eq!(map_link_vowel(0x58, true),  Some("ঔ"));
+    }
+
+    #[test]
+    fn test_direct_vowel_and_signs() {
+        // Shift + F = অ
+        match map_unibijoy_key(0x46, KeyShiftState::Shift) {
+            KeyOutput::Text(t) => assert_eq!(t, "অ"),
+            _ => panic!("Expected অ"),
+        }
+
+        // f = া
+        match map_unibijoy_key(0x46, KeyShiftState::Normal) {
+            KeyOutput::Text(t) => assert_eq!(t, "া"),
+            _ => panic!("Expected া"),
+        }
+
+        // d = ি, Shift + D = ী
+        match map_unibijoy_key(0x44, KeyShiftState::Normal) {
+            KeyOutput::Text(t) => assert_eq!(t, "ি"),
+            _ => panic!("Expected ি"),
+        }
+        match map_unibijoy_key(0x44, KeyShiftState::Shift) {
+            KeyOutput::Text(t) => assert_eq!(t, "ী"),
+            _ => panic!("Expected ী"),
+        }
+    }
+
+    #[test]
+    fn test_consonants() {
+        // j = ক, Shift + J = খ
+        match map_unibijoy_key(0x4A, KeyShiftState::Normal) {
+            KeyOutput::Text(t) => assert_eq!(t, "ক"),
+            _ => panic!("Expected ক"),
+        }
+        match map_unibijoy_key(0x4A, KeyShiftState::Shift) {
+            KeyOutput::Text(t) => assert_eq!(t, "খ"),
+            _ => panic!("Expected খ"),
+        }
+
+        // h = ব, Shift + H = ভ
+        match map_unibijoy_key(0x48, KeyShiftState::Normal) {
+            KeyOutput::Text(t) => assert_eq!(t, "ব"),
+            _ => panic!("Expected ব"),
+        }
+        match map_unibijoy_key(0x48, KeyShiftState::Shift) {
+            KeyOutput::Text(t) => assert_eq!(t, "ভ"),
+            _ => panic!("Expected ভ"),
+        }
+
+        // v = র, Shift + V = ল
+        match map_unibijoy_key(0x56, KeyShiftState::Normal) {
+            KeyOutput::Text(t) => assert_eq!(t, "র"),
+            _ => panic!("Expected র"),
+        }
+        match map_unibijoy_key(0x56, KeyShiftState::Shift) {
+            KeyOutput::Text(t) => assert_eq!(t, "ল"),
+            _ => panic!("Expected ল"),
+        }
+    }
+
+    #[test]
+    fn test_fola_and_reph() {
+        // Shift + A = র্ (Reph)
+        match map_unibijoy_key(0x41, KeyShiftState::Shift) {
+            KeyOutput::Text(t) => assert_eq!(t, "\u{09B0}\u{09CD}"),
+            _ => panic!("Expected Reph"),
+        }
+
+        // z = ্র (ro-fola)
+        match map_unibijoy_key(0x5A, KeyShiftState::Normal) {
+            KeyOutput::Text(t) => assert_eq!(t, "\u{09CD}\u{09B0}"),
+            _ => panic!("Expected ro-fola"),
+        }
+
+        // Shift + Z = ্য (jo-fola)
+        match map_unibijoy_key(0x5A, KeyShiftState::Shift) {
+            KeyOutput::Text(t) => assert_eq!(t, "\u{09CD}\u{09AF}"),
+            _ => panic!("Expected jo-fola"),
+        }
+    }
+
+    #[test]
+    fn test_special_characters() {
+        // Shift + G = । (Dari)
+        match map_unibijoy_key(0x47, KeyShiftState::Shift) {
+            KeyOutput::Text(t) => assert_eq!(t, "।"),
+            _ => panic!("Expected ।"),
+        }
+
+        // g = LinkKey
+        match map_unibijoy_key(0x47, KeyShiftState::Normal) {
+            KeyOutput::LinkKey => {}
+            _ => panic!("Expected LinkKey for 'g'"),
+        }
+
+        // Shift + 4 = ৳ (Taka)
+        match map_unibijoy_key(0x34, KeyShiftState::Shift) {
+            KeyOutput::Text(t) => assert_eq!(t, "৳"),
+            _ => panic!("Expected ৳"),
+        }
+
+        // Shift + 7 = ৎ (Khanda Ta)
+        match map_unibijoy_key(0x37, KeyShiftState::Shift) {
+            KeyOutput::Text(t) => assert_eq!(t, "ৎ"),
+            _ => panic!("Expected ৎ"),
+        }
+    }
+
+    #[test]
+    fn test_numbers() {
+        match map_unibijoy_key(0x31, KeyShiftState::Normal) {
+            KeyOutput::Text(t) => assert_eq!(t, "১"),
+            _ => panic!("Expected ১"),
+        }
+        match map_unibijoy_key(0x30, KeyShiftState::Normal) {
+            KeyOutput::Text(t) => assert_eq!(t, "০"),
+            _ => panic!("Expected ০"),
+        }
+    }
+
+    #[test]
+    fn test_engine_state_transitions() {
+        let mut engine = Engine::new();
+        engine.mode = KeyboardMode::UniBijoy;
+        engine.sound_enabled = false;
+
+        // Press 'n' (স)
+        assert!(engine.handle_key_down(0x4E, false, false, false));
+        // Press 'c' (ে) -> creates 'সে'
+        assert!(engine.handle_key_down(0x43, false, false, false));
+        // Press 'g' (link key)
+        assert!(engine.handle_key_down(0x47, false, false, false));
+        assert!(engine.link_active);
+        // Press 'd' (ই) -> forms 'ই'!
+        assert!(engine.handle_key_down(0x44, false, false, false));
+        assert!(!engine.link_active);
+    }
+
+    #[test]
+    fn test_reph_after_consonant_state() {
+        let mut engine = Engine::new();
+        engine.mode = KeyboardMode::UniBijoy;
+        engine.sound_enabled = false;
+
+        // Type 'j' (ক)
+        assert!(engine.handle_key_down(0x4A, false, false, false));
+        // Type 'm' (ম)
+        assert!(engine.handle_key_down(0x4D, false, false, false));
+        // Type Shift + A (Reph) -> triggers Reph after consonant handler
+        assert!(engine.handle_key_down(0x41, true, false, false));
+    }
+
+    #[test]
+    fn test_juktakkhor_formation() {
+        let mut engine = Engine::new();
+        engine.mode = KeyboardMode::UniBijoy;
+        engine.sound_enabled = false;
+
+        // Type 'j' (ক)
+        assert!(engine.handle_key_down(0x4A, false, false, false));
+        // Type 'g' (link)
+        assert!(engine.handle_key_down(0x47, false, false, false));
+        assert!(engine.link_active);
+        // Type 'j' (ক) -> commits hasanta and types ক -> ক্ক
+        assert!(engine.handle_key_down(0x4A, false, false, false));
+        assert!(!engine.link_active);
+    }
+}
