@@ -26,6 +26,8 @@ SolidCompression=yes
 WizardStyle=modern
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
+CloseApplications=yes
+CloseApplicationsFilter=borno.exe
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -36,7 +38,7 @@ Name: "startwithwindows"; Description: "Automatically start Borno when Windows s
 
 [Files]
 Source: "target\release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "config.ini"; DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist
+Source: "config.ini"; DestDir: "{app}"; Flags: ignoreversion
 Source: "README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "assets\icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "assets\logo.png"; DestDir: "{app}"; Flags: ignoreversion

@@ -59,7 +59,7 @@ impl Engine {
             link_active: false,
             pending_kar: None,
             last_typed: LastTyped::None,
-            sound_enabled: true,
+            sound_enabled: false, // Default off as user requested (OSD badge used instead)
             typing_style: TypingStyle::Classic,
         }
     }

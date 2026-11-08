@@ -2,7 +2,6 @@
 // Reads and writes user preferences to a simple, human-editable 'config.ini' file.
 
 use std::fs;
-use std::path::Path;
 
 #[derive(Debug, Clone)]
 pub enum ShortcutKey {
@@ -45,18 +44,27 @@ impl Default for AppConfig {
 }
 
 impl AppConfig {
-    const CONFIG_FILE: &'static str = "config.ini";
+    pub fn get_config_path() -> std::path::PathBuf {
+        if let Ok(mut exe_path) = std::env::current_exe() {
+            exe_path.pop();
+            exe_path.push("config.ini");
+            exe_path
+        } else {
+            std::path::PathBuf::from("config.ini")
+        }
+    }
 
     /// Load config from file or create default if not present
     pub fn load_or_create() -> Self {
-        if !Path::new(Self::CONFIG_FILE).exists() {
+        let config_path = Self::get_config_path();
+        if !config_path.exists() {
             let default_cfg = Self::default();
             default_cfg.save_to_file();
             return default_cfg;
         }
 
         let mut config = Self::default();
-        if let Ok(content) = fs::read_to_string(Self::CONFIG_FILE) {
+        if let Ok(content) = fs::read_to_string(&config_path) {
             for line in content.lines() {
                 let trimmed = line.trim();
                 if trimmed.is_empty() || trimmed.starts_with('#') || trimmed.starts_with(';') {
@@ -75,8 +83,8 @@ impl AppConfig {
                                 _ => ShortcutKey::CtrlBackslash,
                             };
                         }
-                        "sound" => {
-                            config.sound_enabled = !matches!(v.to_lowercase().as_str(), "false" | "0" | "no" | "off");
+                        "sound" | "beep" | "audio" => {
+                            config.sound_enabled = matches!(v.to_lowercase().as_str(), "true" | "1" | "yes" | "on");
                         }
                         "typing_style" => {
                             config.typing_style = match v.to_lowercase().as_str() {
@@ -158,7 +166,7 @@ osd_badge = {}
             if self.osd_badge { "true" } else { "false" }
         );
 
-        let _ = fs::write(Self::CONFIG_FILE, content);
+        let _ = fs::write(Self::get_config_path(), content);
     }
 }
 

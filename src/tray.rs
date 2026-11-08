@@ -291,9 +291,19 @@ fn copy_to_wide_array(src: &str, dst: &mut [u16]) {
 }
 
 fn open_file_in_default_app(file_name: &str) {
+    let path = if file_name == "config.ini" {
+        crate::config::AppConfig::get_config_path()
+    } else if let Ok(mut p) = std::env::current_exe() {
+        p.pop();
+        p.push(file_name);
+        p
+    } else {
+        std::path::PathBuf::from(file_name)
+    };
+    let path_str = path.to_string_lossy().to_string();
     unsafe {
         let op = to_wide_string("open");
-        let file = to_wide_string(file_name);
+        let file = to_wide_string(&path_str);
         ShellExecuteW(
             std::ptr::null_mut(),
             op.as_ptr(),
