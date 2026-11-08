@@ -92,6 +92,15 @@ pub unsafe extern "system" fn low_level_keyboard_proc(
             let mut engine = ENGINE.lock().unwrap();
             if engine.mode != target_mode {
                 engine.set_mode(target_mode);
+
+                let show_osd = {
+                    let cfg_guard = CONFIG.lock().unwrap();
+                    cfg_guard.as_ref().map_or(true, |c| c.osd_badge)
+                };
+                if show_osd {
+                    crate::osd::show_mode_badge(target_mode);
+                }
+
                 let tray_hwnd = crate::tray::get_tray_hwnd();
                 if !tray_hwnd.is_null() {
                     crate::tray::update_tray_tooltip(tray_hwnd, target_mode);
@@ -142,6 +151,15 @@ pub unsafe extern "system" fn low_level_keyboard_proc(
             {
                 let mut wsm = WINDOW_STATE_MGR.lock().unwrap();
                 wsm.set_mode_for_window(current_hwnd, new_mode);
+            }
+
+            // Show sleek floating "বাংলা" / "EN" badge near cursor
+            let show_osd = {
+                let cfg_guard = CONFIG.lock().unwrap();
+                cfg_guard.as_ref().map_or(true, |c| c.osd_badge)
+            };
+            if show_osd {
+                crate::osd::show_mode_badge(new_mode);
             }
 
             // Update tray tooltip if tray window exists

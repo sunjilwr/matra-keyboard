@@ -31,6 +31,38 @@ pub struct WNDCLASSEXW {
 }
 
 #[repr(C)]
+#[derive(Clone, Copy, Default, Debug)]
+pub struct RECT {
+    pub left: i32,
+    pub top: i32,
+    pub right: i32,
+    pub bottom: i32,
+}
+
+#[repr(C)]
+pub struct PAINTSTRUCT {
+    pub hdc: *mut std::ffi::c_void,
+    pub fErase: BOOL,
+    pub rcPaint: RECT,
+    pub fRestore: BOOL,
+    pub fIncUpdate: BOOL,
+    pub rgbReserved: [u8; 32],
+}
+
+#[repr(C)]
+pub struct GUITHREADINFO {
+    pub cbSize: u32,
+    pub flags: u32,
+    pub hwndActive: HWND,
+    pub hwndFocus: HWND,
+    pub hwndCapture: HWND,
+    pub hwndMenuOwner: HWND,
+    pub hwndMoveSize: HWND,
+    pub hwndCaret: HWND,
+    pub rcCaret: RECT,
+}
+
+#[repr(C)]
 #[derive(Clone, Copy, Default)]
 pub struct POINT {
     pub x: i32,
@@ -224,7 +256,65 @@ unsafe extern "system" {
     pub fn GetForegroundWindow() -> HWND;
     pub fn GetAncestor(hwnd: HWND, gaFlags: u32) -> HWND;
     pub fn IsWindow(hWnd: HWND) -> BOOL;
+    pub fn GetGUIThreadInfo(idThread: u32, pgui: *mut GUITHREADINFO) -> BOOL;
+    pub fn GetWindowThreadProcessId(hWnd: HWND, lpdwProcessId: *mut u32) -> u32;
+    pub fn ClientToScreen(hWnd: HWND, lpPoint: *mut POINT) -> BOOL;
+    pub fn BeginPaint(hWnd: HWND, lpPaint: *mut PAINTSTRUCT) -> *mut std::ffi::c_void;
+    pub fn EndPaint(hWnd: HWND, lpPaint: *const PAINTSTRUCT) -> BOOL;
+    pub fn SetWindowPos(hWnd: HWND, hWndInsertAfter: HWND, X: i32, Y: i32, cx: i32, cy: i32, uFlags: u32) -> BOOL;
+    pub fn SetTimer(hWnd: HWND, nIDEvent: usize, uElapse: u32, lpTimerFunc: *const std::ffi::c_void) -> usize;
+    pub fn KillTimer(hWnd: HWND, uIDEvent: usize) -> BOOL;
+    pub fn InvalidateRect(hWnd: HWND, lpRect: *const RECT, bErase: BOOL) -> BOOL;
+    pub fn FillRect(hDC: *mut std::ffi::c_void, lprc: *const RECT, hbr: *mut std::ffi::c_void) -> i32;
+    pub fn DrawTextW(hdc: *mut std::ffi::c_void, lpchText: *const u16, cchText: i32, lprc: *mut RECT, format: u32) -> i32;
+    pub fn SetWindowRgn(hWnd: HWND, hRgn: *mut std::ffi::c_void, bRedraw: BOOL) -> i32;
+    pub fn GetSystemMetrics(nIndex: i32) -> i32;
 }
+
+#[link(name = "gdi32")]
+unsafe extern "system" {
+    pub fn CreateSolidBrush(color: u32) -> *mut std::ffi::c_void;
+    pub fn DeleteObject(ho: *mut std::ffi::c_void) -> BOOL;
+    pub fn CreateFontW(
+        cHeight: i32,
+        cWidth: i32,
+        cEscapement: i32,
+        cOrientation: i32,
+        cWeight: i32,
+        bItalic: u32,
+        bUnderline: u32,
+        bStrikeOut: u32,
+        iCharSet: u32,
+        iOutPrecision: u32,
+        iClipPrecision: u32,
+        iQuality: u32,
+        iPitchAndFamily: u32,
+        pszFaceName: *const u16,
+    ) -> *mut std::ffi::c_void;
+    pub fn SelectObject(hdc: *mut std::ffi::c_void, h: *mut std::ffi::c_void) -> *mut std::ffi::c_void;
+    pub fn SetBkMode(hdc: *mut std::ffi::c_void, mode: i32) -> i32;
+    pub fn SetTextColor(hdc: *mut std::ffi::c_void, color: u32) -> u32;
+    pub fn CreateRoundRectRgn(x1: i32, y1: i32, x2: i32, y2: i32, w: i32, h: i32) -> *mut std::ffi::c_void;
+}
+
+pub const WS_EX_TOPMOST: u32 = 0x00000008;
+pub const WS_EX_TOOLWINDOW: u32 = 0x00000080;
+pub const WS_EX_NOACTIVATE: u32 = 0x08000000;
+pub const WS_POPUP: u32 = 0x80000000;
+
+pub const HWND_TOPMOST: HWND = -1 as isize as HWND;
+pub const SWP_NOSIZE: u32 = 0x0001;
+pub const SWP_NOMOVE: u32 = 0x0002;
+pub const SWP_NOACTIVATE: u32 = 0x0010;
+pub const SWP_SHOWWINDOW: u32 = 0x0040;
+
+pub const DT_CENTER: u32 = 0x00000001;
+pub const DT_VCENTER: u32 = 0x00000004;
+pub const DT_SINGLELINE: u32 = 0x00000020;
+
+pub const TRANSPARENT: i32 = 1;
+pub const SM_CXSCREEN: i32 = 0;
+pub const SM_CYSCREEN: i32 = 1;
 
 pub const GA_ROOT: u32 = 2;
 

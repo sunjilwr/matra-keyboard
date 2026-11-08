@@ -9,6 +9,7 @@ mod layout;
 mod engine;
 mod hook;
 mod tray;
+mod osd;
 
 use config::{AppConfig, ShortcutKey, TypingStyle};
 use win32::*;
@@ -67,6 +68,9 @@ fn main() {
     };
     print_mode_banner(initial_mode);
 
+    // Initialize On-Screen Display (OSD) Floating Badge
+    osd::init_osd();
+
     // Initialize System Tray Icon (notification area)
     let tray_hwnd = init_tray(initial_mode);
 
@@ -107,6 +111,7 @@ fn print_welcome_banner(config: &AppConfig) {
     println!("  \x1b[1mActive Shortcut:\x1b[0m \x1b[1;33m{}\x1b[0m (Change anytime in config.ini)", shortcut_display);
     println!("  \x1b[1mTyping Style:\x1b[0m    \x1b[1;36m{}\x1b[0m", typing_style_display);
     println!("  \x1b[1mAudio Feedback:\x1b[0m  {}", if config.sound_enabled { "\x1b[1;32mEnabled (Beep)\x1b[0m" } else { "\x1b[90mDisabled\x1b[0m" });
+    println!("  \x1b[1mOn-Screen Badge:\x1b[0m {}", if config.osd_badge { "\x1b[1;32mEnabled (Floating বাংলা/EN near cursor)\x1b[0m" } else { "\x1b[90mDisabled\x1b[0m" });
     println!("  \x1b[1mPer-App Language:\x1b[0m {}", if config.per_window_mode { "\x1b[1;32mEnabled (Auto-remembers per app)\x1b[0m" } else { "\x1b[90mDisabled (Global)\x1b[0m" });
     println!();
     println!("  \x1b[1mUniBijoy Quick Typing Cheat-Sheet:\x1b[0m");
