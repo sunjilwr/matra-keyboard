@@ -1,4 +1,4 @@
-// UniBijoy & English System-wide Keyboard for Windows
+// Borno Bangla & English System-wide Keyboard for Windows
 // Written in Pure Rust with zero external dependencies.
 
 #![windows_subsystem = "windows"]
@@ -100,12 +100,12 @@ fn print_welcome_banner(config: &AppConfig) {
     };
 
     let typing_style_display = match config.typing_style {
-        TypingStyle::Classic => "Classic Bijoy (ি+ক = কি & ক+ি = কি)",
+        TypingStyle::Classic => "Classic Visual (ি+ক = কি & ক+ি = কি)",
         TypingStyle::Modern => "Modern Unicode (ক+ি = কি)",
     };
 
     println!("\x1b[1;36m====================================================================\x1b[0m");
-    println!("\x1b[1;32m  ⌨️   Borno (বর্ণ) - Native UniBijoy & English Keyboard (Rust)\x1b[0m");
+    println!("\x1b[1;32m  ⌨️   Borno (বর্ণ) - Native Bangla & English Keyboard (Rust)\x1b[0m");
     println!("\x1b[1;36m====================================================================\x1b[0m");
     println!("  \x1b[1mStatus:\x1b[0m System-wide Keyboard Active across ALL applications!");
     println!("  \x1b[1mActive Shortcut:\x1b[0m \x1b[1;33m{}\x1b[0m (Change anytime in config.ini)", shortcut_display);
@@ -114,7 +114,7 @@ fn print_welcome_banner(config: &AppConfig) {
     println!("  \x1b[1mOn-Screen Badge:\x1b[0m {}", if config.osd_badge { "\x1b[1;32mEnabled (Floating BN/EN near cursor)\x1b[0m" } else { "\x1b[90mDisabled\x1b[0m" });
     println!("  \x1b[1mPer-App Language:\x1b[0m {}", if config.per_window_mode { "\x1b[1;32mEnabled (Auto-remembers per app)\x1b[0m" } else { "\x1b[90mDisabled (Global)\x1b[0m" });
     println!();
-    println!("  \x1b[1mUniBijoy Quick Typing Cheat-Sheet:\x1b[0m");
+    println!("  \x1b[1mBangla Quick Typing Cheat-Sheet:\x1b[0m");
     println!("    • \x1b[36mস্বরবর্ণ:\x1b[0m Shift+F=অ, g+f=আ, g+d=ই, g+D=ঈ, g+s=উ, g+S=ঊ, g+a=ঋ, g+c=এ, g+C=ঐ, g+x=ও, g+X=ঔ");
     println!("    • \x1b[36mকার চিহ্ন:\x1b[0m f=া, d=ি, D=ী, s=ু, S=ূ, a=ৃ, c=ে, C=ৈ, x=ো, X=ৌ");
     println!("    • \x1b[36mযুক্তাক্ষর:\x1b[0m ক + g + ক = ক্ক, ত + g + ত = ত্ত, ব + g + ব = ব্ব, ক + z = ক্র, ক + Z = ক্য");

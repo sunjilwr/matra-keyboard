@@ -1,4 +1,4 @@
-# ⌨️ Borno (বর্ণ) - Ultra-Lightweight UniBijoy & English Keyboard
+# ⌨️ Borno (বর্ণ) - Ultra-Lightweight Bangla & English Keyboard
 
 <p align="center">
   <img src="assets/logo.png" alt="Borno Logo" width="128" height="128" />
@@ -33,7 +33,7 @@
    - **`Ctrl + \`** (ডিফল্ট ও রিকমেন্ডেড): উইন্ডোজের কোনো সফটওয়্যার বা ব্রাউজারের সাথে কনফ্লিক্ট করে না।
    - এছাড়াও `Ctrl+F12`, `F12`, `Alt+\`, বা `Ctrl+Space` নির্বাচন করার সুবিধা।
 
-5. **🎯 পারফেক্ট ইউনিকোড বিজয় লেআউট (Accurate UniBijoy Engine):**
+5. **🎯 পারফেক্ট ইউনিকোড বাংলা লেআউট (Accurate Bangla Engine):**
    - **"ফ্রেন্ডলি"** = `Shift+R` (ফ) + `z` (্র) + `c` (ে) + `b` (ন) + `g` (্) + `e` (ড) + `Shift+V` (ল) + `d` (ি)
    - **"কর্ম"** = `j` (ক) + `m` (ম) + `Shift+A` (র্) — স্বাভাবিক টাইপিং অভ্যাসের সাথে শতভাগ সামঞ্জস্যপূর্ণ।
    - **"সেই"** = `n` (স) + `c` (ে) + `g` + `d` (ই)।

@@ -216,8 +216,8 @@ unsafe fn show_tray_menu(hwnd: HWND) {
     };
 
     let toggle_label = match mode {
-        KeyboardMode::English => "Switch to বাংলা (UniBijoy)    Ctrl+\\",
-        KeyboardMode::UniBijoy => "Switch to English                Ctrl+\\",
+        KeyboardMode::English => "Switch to বাংলা (BN)    Ctrl+\\",
+        KeyboardMode::Bangla => "Switch to English (EN)   Ctrl+\\",
     };
 
     let w_toggle = to_wide_string(toggle_label);
@@ -250,7 +250,7 @@ unsafe fn show_tray_menu(hwnd: HWND) {
 fn mode_name(mode: KeyboardMode) -> &'static str {
     match mode {
         KeyboardMode::English => "English (EN)",
-        KeyboardMode::UniBijoy => "UniBijoy (বাংলা)",
+        KeyboardMode::Bangla => "বাংলা (BN)",
     }
 }
 

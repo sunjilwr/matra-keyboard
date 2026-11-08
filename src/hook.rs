@@ -1,5 +1,5 @@
 // Low-Level Windows Keyboard Hook (WH_KEYBOARD_LL)
-// Intercepts keys globally across all Windows applications and routes them to the UniBijoy engine.
+// Intercepts keys globally across all Windows applications and routes them to the Borno Bangla engine.
 
 use std::collections::HashMap;
 use std::sync::{LazyLock, Mutex};
@@ -114,15 +114,15 @@ pub unsafe extern "system" fn low_level_keyboard_proc(
         engine.mode
     };
 
-    // In UniBijoy mode: prevent accidental Caps Lock toggle from disrupting typing
-    if engine_mode == KeyboardMode::UniBijoy && kbd.vk_code == VK_CAPITAL as u32 {
+    // In Bangla mode: prevent accidental Caps Lock toggle from disrupting typing
+    if engine_mode == KeyboardMode::Bangla && kbd.vk_code == VK_CAPITAL as u32 {
         // Swallow Caps Lock completely so Windows NEVER locks the keyboard into ALL CAPS
         return 1;
     }
 
-    // In UniBijoy mode, if user holds Caps Lock or Shift, treat as Shift!
+    // In Bangla mode, if user holds Caps Lock or Shift, treat as Shift!
     let is_caps_down = is_key_pressed(VK_CAPITAL);
-    let is_shift = is_key_pressed(VK_SHIFT) || (engine_mode == KeyboardMode::UniBijoy && is_caps_down);
+    let is_shift = is_key_pressed(VK_SHIFT) || (engine_mode == KeyboardMode::Bangla && is_caps_down);
 
     // Check for Language Switch Hotkey on KeyDown
     let is_toggle_key = {
@@ -179,11 +179,11 @@ pub unsafe extern "system" fn low_level_keyboard_proc(
         }
     } else if is_key_up {
         let engine = ENGINE.lock().unwrap();
-        if engine.mode == KeyboardMode::UniBijoy {
-            // If in UniBijoy mode and not holding Ctrl/Alt, suppress the character keyup
+        if engine.mode == KeyboardMode::Bangla {
+            // If in Bangla mode and not holding Ctrl/Alt, suppress the character keyup
             let is_alt_gr = is_ctrl && is_alt;
             if (!is_ctrl && !is_alt) || is_alt_gr {
-                // If it's a typing key that UniBijoy intercepts, suppress KeyUp too
+                // If it's a typing key that Bangla intercepts, suppress KeyUp too
                 if is_typing_key(kbd.vk_code) {
                     return 1;
                 }
@@ -216,8 +216,8 @@ pub fn print_mode_banner(mode: KeyboardMode) {
         KeyboardMode::English => {
             println!("\n  [\x1b[1;36mMODE\x1b[0m] \x1b[1;32mENGLISH\x1b[0m (Direct passthrough)");
         }
-        KeyboardMode::UniBijoy => {
-            println!("\n  [\x1b[1;36mMODE\x1b[0m] \x1b[1;33mUNIBIJOY (ইউনিবিজয়)\x1b[0m | Bengali Unicode Active!");
+        KeyboardMode::Bangla => {
+            println!("\n  [\x1b[1;36mMODE\x1b[0m] \x1b[1;33mBANGLA (বাংলা)\x1b[0m | Bengali Unicode Active!");
         }
     }
 }

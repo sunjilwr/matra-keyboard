@@ -173,7 +173,7 @@ pub fn show_mode_badge(mode: KeyboardMode) {
     if !hwnd.is_null() {
         let mode_val = match mode {
             KeyboardMode::English => 0usize,
-            KeyboardMode::UniBijoy => 1usize,
+            KeyboardMode::Bangla => 1usize,
         };
         unsafe {
             PostMessageW(hwnd, WM_SHOW_BADGE, mode_val, 0);

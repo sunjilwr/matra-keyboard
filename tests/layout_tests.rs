@@ -1,4 +1,4 @@
-// Unit tests for UniBijoy layout mappings and engine rules
+// Unit tests for Borno Bangla layout mappings and engine rules
 
 #[cfg(test)]
 mod tests {
@@ -22,23 +22,23 @@ mod tests {
     #[test]
     fn test_direct_vowel_and_signs() {
         // Shift + F = অ
-        match map_unibijoy_key(0x46, KeyShiftState::Shift) {
+        match map_bangla_key(0x46, KeyShiftState::Shift) {
             KeyOutput::Text(t) => assert_eq!(t, "অ"),
             _ => panic!("Expected অ"),
         }
 
         // f = া
-        match map_unibijoy_key(0x46, KeyShiftState::Normal) {
+        match map_bangla_key(0x46, KeyShiftState::Normal) {
             KeyOutput::Text(t) => assert_eq!(t, "া"),
             _ => panic!("Expected া"),
         }
 
         // d = ি, Shift + D = ী
-        match map_unibijoy_key(0x44, KeyShiftState::Normal) {
+        match map_bangla_key(0x44, KeyShiftState::Normal) {
             KeyOutput::Text(t) => assert_eq!(t, "ি"),
             _ => panic!("Expected ি"),
         }
-        match map_unibijoy_key(0x44, KeyShiftState::Shift) {
+        match map_bangla_key(0x44, KeyShiftState::Shift) {
             KeyOutput::Text(t) => assert_eq!(t, "ী"),
             _ => panic!("Expected ী"),
         }
@@ -47,31 +47,31 @@ mod tests {
     #[test]
     fn test_consonants() {
         // j = ক, Shift + J = খ
-        match map_unibijoy_key(0x4A, KeyShiftState::Normal) {
+        match map_bangla_key(0x4A, KeyShiftState::Normal) {
             KeyOutput::Text(t) => assert_eq!(t, "ক"),
             _ => panic!("Expected ক"),
         }
-        match map_unibijoy_key(0x4A, KeyShiftState::Shift) {
+        match map_bangla_key(0x4A, KeyShiftState::Shift) {
             KeyOutput::Text(t) => assert_eq!(t, "খ"),
             _ => panic!("Expected খ"),
         }
 
         // h = ব, Shift + H = ভ
-        match map_unibijoy_key(0x48, KeyShiftState::Normal) {
+        match map_bangla_key(0x48, KeyShiftState::Normal) {
             KeyOutput::Text(t) => assert_eq!(t, "ব"),
             _ => panic!("Expected ব"),
         }
-        match map_unibijoy_key(0x48, KeyShiftState::Shift) {
+        match map_bangla_key(0x48, KeyShiftState::Shift) {
             KeyOutput::Text(t) => assert_eq!(t, "ভ"),
             _ => panic!("Expected ভ"),
         }
 
         // v = র, Shift + V = ল
-        match map_unibijoy_key(0x56, KeyShiftState::Normal) {
+        match map_bangla_key(0x56, KeyShiftState::Normal) {
             KeyOutput::Text(t) => assert_eq!(t, "র"),
             _ => panic!("Expected র"),
         }
-        match map_unibijoy_key(0x56, KeyShiftState::Shift) {
+        match map_bangla_key(0x56, KeyShiftState::Shift) {
             KeyOutput::Text(t) => assert_eq!(t, "ল"),
             _ => panic!("Expected ল"),
         }
@@ -80,19 +80,19 @@ mod tests {
     #[test]
     fn test_fola_and_reph() {
         // Shift + A = র্ (Reph)
-        match map_unibijoy_key(0x41, KeyShiftState::Shift) {
+        match map_bangla_key(0x41, KeyShiftState::Shift) {
             KeyOutput::Text(t) => assert_eq!(t, "\u{09B0}\u{09CD}"),
             _ => panic!("Expected Reph"),
         }
 
         // z = ্র (ro-fola)
-        match map_unibijoy_key(0x5A, KeyShiftState::Normal) {
+        match map_bangla_key(0x5A, KeyShiftState::Normal) {
             KeyOutput::Text(t) => assert_eq!(t, "\u{09CD}\u{09B0}"),
             _ => panic!("Expected ro-fola"),
         }
 
         // Shift + Z = ্য (jo-fola)
-        match map_unibijoy_key(0x5A, KeyShiftState::Shift) {
+        match map_bangla_key(0x5A, KeyShiftState::Shift) {
             KeyOutput::Text(t) => assert_eq!(t, "\u{09CD}\u{09AF}"),
             _ => panic!("Expected jo-fola"),
         }
@@ -101,25 +101,25 @@ mod tests {
     #[test]
     fn test_special_characters() {
         // Shift + G = । (Dari)
-        match map_unibijoy_key(0x47, KeyShiftState::Shift) {
+        match map_bangla_key(0x47, KeyShiftState::Shift) {
             KeyOutput::Text(t) => assert_eq!(t, "।"),
             _ => panic!("Expected ।"),
         }
 
         // g = LinkKey
-        match map_unibijoy_key(0x47, KeyShiftState::Normal) {
+        match map_bangla_key(0x47, KeyShiftState::Normal) {
             KeyOutput::LinkKey => {}
             _ => panic!("Expected LinkKey for 'g'"),
         }
 
         // Shift + 4 = ৳ (Taka)
-        match map_unibijoy_key(0x34, KeyShiftState::Shift) {
+        match map_bangla_key(0x34, KeyShiftState::Shift) {
             KeyOutput::Text(t) => assert_eq!(t, "৳"),
             _ => panic!("Expected ৳"),
         }
 
         // Shift + 7 = ৎ (Khanda Ta)
-        match map_unibijoy_key(0x37, KeyShiftState::Shift) {
+        match map_bangla_key(0x37, KeyShiftState::Shift) {
             KeyOutput::Text(t) => assert_eq!(t, "ৎ"),
             _ => panic!("Expected ৎ"),
         }
@@ -127,11 +127,11 @@ mod tests {
 
     #[test]
     fn test_numbers() {
-        match map_unibijoy_key(0x31, KeyShiftState::Normal) {
+        match map_bangla_key(0x31, KeyShiftState::Normal) {
             KeyOutput::Text(t) => assert_eq!(t, "১"),
             _ => panic!("Expected ১"),
         }
-        match map_unibijoy_key(0x30, KeyShiftState::Normal) {
+        match map_bangla_key(0x30, KeyShiftState::Normal) {
             KeyOutput::Text(t) => assert_eq!(t, "০"),
             _ => panic!("Expected ০"),
         }
@@ -140,7 +140,7 @@ mod tests {
     #[test]
     fn test_engine_state_transitions() {
         let mut engine = Engine::new();
-        engine.mode = KeyboardMode::UniBijoy;
+        engine.mode = KeyboardMode::Bangla;
         engine.sound_enabled = false;
 
         // Press 'n' (স)
@@ -158,7 +158,7 @@ mod tests {
     #[test]
     fn test_reph_after_consonant_state() {
         let mut engine = Engine::new();
-        engine.mode = KeyboardMode::UniBijoy;
+        engine.mode = KeyboardMode::Bangla;
         engine.sound_enabled = false;
 
         // 1. Type 'j' (ক)
@@ -178,7 +178,7 @@ mod tests {
     #[test]
     fn test_friendly_typing_sequence() {
         let mut engine = Engine::new();
-        engine.mode = KeyboardMode::UniBijoy;
+        engine.mode = KeyboardMode::Bangla;
         engine.sound_enabled = false;
 
         // Modern phonetic sequence for "ফ্রেন্ডলি":
@@ -220,7 +220,7 @@ mod tests {
     #[test]
     fn test_classic_visual_fola_transformation() {
         let mut engine = Engine::new();
-        engine.mode = KeyboardMode::UniBijoy;
+        engine.mode = KeyboardMode::Bangla;
         engine.sound_enabled = false;
 
         // Classic sequence for "ফ্রে":
@@ -240,7 +240,7 @@ mod tests {
     #[test]
     fn test_juktakkhor_formation() {
         let mut engine = Engine::new();
-        engine.mode = KeyboardMode::UniBijoy;
+        engine.mode = KeyboardMode::Bangla;
         engine.sound_enabled = false;
 
         // Type 'j' (ক)
@@ -262,14 +262,14 @@ mod tests {
         // 1. User focuses Window 101 (e.g. Word) -> defaults to English
         assert_eq!(wsm.sync_active_window(101), Some(KeyboardMode::English));
 
-        // 2. User toggles to UniBijoy in Window 101
-        wsm.set_mode_for_window(101, KeyboardMode::UniBijoy);
+        // 2. User toggles to Bangla in Window 101
+        wsm.set_mode_for_window(101, KeyboardMode::Bangla);
 
         // 3. User switches to Window 202 (e.g. VS Code / Terminal) -> automatically English!
         assert_eq!(wsm.sync_active_window(202), Some(KeyboardMode::English));
 
-        // 4. User switches back to Window 101 (Word) -> automatically restores UniBijoy!
-        assert_eq!(wsm.sync_active_window(101), Some(KeyboardMode::UniBijoy));
+        // 4. User switches back to Window 101 (Word) -> automatically restores Bangla!
+        assert_eq!(wsm.sync_active_window(101), Some(KeyboardMode::Bangla));
 
         // 5. Still in Window 101 -> returns None (no change needed)
         assert_eq!(wsm.sync_active_window(101), None);

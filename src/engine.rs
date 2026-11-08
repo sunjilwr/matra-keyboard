@@ -1,10 +1,10 @@
-// Typing Engine for UniBijoy
+// Typing Engine for Borno Bangla
 // Handles stateful typing: Link key ('g'), conjuncts, vowel forming, Classic/Modern Kar typing,
 // Reph after consonant, and key interception.
 
 use crate::config::TypingStyle;
 use crate::layout::{
-    get_pre_base_kar, is_bengali_consonant, is_bengali_kar, map_link_vowel, map_unibijoy_key,
+    get_pre_base_kar, is_bengali_consonant, is_bengali_kar, map_link_vowel, map_bangla_key,
     KeyOutput, KeyShiftState,
 };
 use crate::win32::*;
@@ -12,7 +12,7 @@ use crate::win32::*;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum KeyboardMode {
     English,
-    UniBijoy,
+    Bangla,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -64,22 +64,22 @@ impl Engine {
         }
     }
 
-    /// Toggle between English and UniBijoy modes
+    /// Toggle between English and Bangla modes
     pub fn toggle_mode(&mut self) -> KeyboardMode {
         self.reset_state();
 
         self.mode = match self.mode {
             KeyboardMode::English => {
                 turn_caps_lock_off();
-                KeyboardMode::UniBijoy
+                KeyboardMode::Bangla
             }
-            KeyboardMode::UniBijoy => KeyboardMode::English,
+            KeyboardMode::Bangla => KeyboardMode::English,
         };
 
         // Play crisp, subtle confirmation beep
         if self.sound_enabled {
             match self.mode {
-                KeyboardMode::UniBijoy => {
+                KeyboardMode::Bangla => {
                     // High pleasant tone (880 Hz, 80 ms)
                     unsafe { Beep(880, 80); }
                 }
@@ -99,7 +99,7 @@ impl Engine {
         if self.mode != mode {
             self.reset_state();
             self.mode = mode;
-            if mode == KeyboardMode::UniBijoy {
+            if mode == KeyboardMode::Bangla {
                 turn_caps_lock_off();
             }
         }
@@ -173,7 +173,7 @@ impl Engine {
 
         // ====================================================================
         // 1. REPH AFTER CONSONANT FIX: 'কমর্' -> 'কর্ম'
-        // In Bijoy typing habit, users frequently press consonant (e.g. 'ম' = m) THEN Reph ('Shift+A').
+        // In traditional typing habit, users frequently press consonant (e.g. 'ম' = m) THEN Reph ('Shift+A').
         // If Shift+A is pressed immediately after a consonant, replace 'C' with 'র্' + 'C'.
         // ====================================================================
         if vk == 0x41 && is_shift {
@@ -243,7 +243,7 @@ impl Engine {
         }
 
         // ====================================================================
-        // 4. CLASSIC BIJOY VISUAL TYPING SUPPORT: 'ি + ক' -> 'কি'
+        // 4. CLASSIC VISUAL TYPING SUPPORT: 'ি + ক' -> 'কি'
         // If typing_style == Classic and this key is a pre-base kar (ি, ে, ৈ, ো, ৌ),
         // and last_typed was NOT a consonant base (i.e. visual order at start of syllable):
         // ====================================================================
@@ -256,9 +256,9 @@ impl Engine {
         }
 
         // ====================================================================
-        // 5. STANDARD UNIBIJOY KEY MAPPING
+        // 5. STANDARD BANGLA KEY MAPPING
         // ====================================================================
-        match map_unibijoy_key(vk, shift_state) {
+        match map_bangla_key(vk, shift_state) {
             KeyOutput::Text(text) => {
                 let is_cons = is_bengali_consonant(text);
 

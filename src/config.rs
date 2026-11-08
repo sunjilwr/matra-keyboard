@@ -16,7 +16,7 @@ pub enum ShortcutKey {
 pub enum TypingStyle {
     /// Modern Unicode style: Consonant followed by Kar (ক + ি = কি)
     Modern,
-    /// Classic Bijoy style: Supports typing Kar before Consonant (ি + ক = কি) as well as Modern
+    /// Classic visual style: Supports typing Kar before Consonant (ি + ক = কি) as well as Modern
     Classic,
 }
 
@@ -129,7 +129,7 @@ r#"# ====================================================================
 # bnkeyboard Configuration File (ইউজার কনফিগারেশন)
 # ====================================================================
 
-# Language switch shortcut (English <-> UniBijoy)
+# Language switch shortcut (English <-> Bangla)
 # Available options:
 #   Ctrl+\       (Recommended - Zero conflicts with other apps)
 #   Ctrl+F12     (Safe function key)

@@ -1,5 +1,5 @@
-// UniBijoy Layout Definitions
-// Exact 1-to-1 Unicode Bijoy mappings for English keyboard layout.
+// Borno Bangla Layout Definitions
+// Unicode Bengali standard mapping for English keyboard layout.
 
 use crate::win32::*;
 
@@ -11,7 +11,7 @@ pub enum KeyShiftState {
     ShiftAltGr,
 }
 
-/// Represents the mapped output of a key in UniBijoy layout
+/// Represents the mapped output of a key in Borno Bangla layout
 #[derive(Debug, Clone)]
 pub enum KeyOutput {
     /// Direct text/character output
@@ -22,8 +22,8 @@ pub enum KeyOutput {
     PassThrough,
 }
 
-/// Get the mapped output for a virtual key code in UniBijoy layout
-pub fn map_unibijoy_key(vk: u32, state: KeyShiftState) -> KeyOutput {
+/// Get the mapped output for a virtual key code in Borno Bangla layout
+pub fn map_bangla_key(vk: u32, state: KeyShiftState) -> KeyOutput {
     match state {
         KeyShiftState::AltGr => match vk {
             0x41 => KeyOutput::Text("ঋ"), // AltGr + A
@@ -32,7 +32,7 @@ pub fn map_unibijoy_key(vk: u32, state: KeyShiftState) -> KeyOutput {
             0x46 => KeyOutput::Text("আ"), // AltGr + F
             0x58 => KeyOutput::Text("ও"), // AltGr + X
             0x43 => KeyOutput::Text("এ"), // AltGr + C
-            _ => map_unibijoy_normal_or_shift(vk, KeyShiftState::Normal),
+            _ => map_bangla_normal_or_shift(vk, KeyShiftState::Normal),
         },
         KeyShiftState::ShiftAltGr => match vk {
             0x53 => KeyOutput::Text("ঊ"), // Shift + AltGr + S
@@ -40,15 +40,15 @@ pub fn map_unibijoy_key(vk: u32, state: KeyShiftState) -> KeyOutput {
             0x46 => KeyOutput::Text("অ"), // Shift + AltGr + F
             0x58 => KeyOutput::Text("ঔ"), // Shift + AltGr + X
             0x43 => KeyOutput::Text("ঐ"), // Shift + AltGr + C
-            _ => map_unibijoy_normal_or_shift(vk, KeyShiftState::Shift),
+            _ => map_bangla_normal_or_shift(vk, KeyShiftState::Shift),
         },
         KeyShiftState::Normal | KeyShiftState::Shift => {
-            map_unibijoy_normal_or_shift(vk, state)
+            map_bangla_normal_or_shift(vk, state)
         }
     }
 }
 
-fn map_unibijoy_normal_or_shift(vk: u32, state: KeyShiftState) -> KeyOutput {
+fn map_bangla_normal_or_shift(vk: u32, state: KeyShiftState) -> KeyOutput {
     let is_shift = state == KeyShiftState::Shift;
 
     // Number keys row (0x30 to 0x39: '0' - '9')
@@ -156,7 +156,7 @@ pub fn map_link_vowel(vk: u32, is_shift: bool) -> Option<&'static str> {
     }
 }
 
-/// Check if a key is a pre-base Kar (ি, ে, ৈ, ো, ৌ) for Classic Bijoy visual typing
+/// Check if a key is a pre-base Kar (ি, ে, ৈ, ো, ৌ) for Classic visual typing
 pub fn get_pre_base_kar(vk: u32, is_shift: bool) -> Option<&'static str> {
     match (vk, is_shift) {
         (0x44, false) => Some("ি"), // d = ি
