@@ -241,8 +241,8 @@ pub fn send_unicode_string(s: &str) {
 }
 
 /// Send backspace keystrokes to erase N characters.
-/// If Shift is physically held down by the user, Shift is temporarily released
-/// in the input queue so the application receives a pure Backspace, NOT Shift+Backspace!
+/// If Shift is physically held down by the user, Shift is released
+/// so the application receives a pure Backspace, NOT Shift+Backspace.
 pub fn send_backspaces(count: usize) {
     if count == 0 {
         return;
@@ -251,7 +251,7 @@ pub fn send_backspaces(count: usize) {
 
     let mut inputs: Vec<INPUT> = Vec::new();
 
-    // 1. Release Shift temporarily so apps don't treat this as Shift+Backspace
+    // 1. Release Shift so apps don't treat this as Shift+Backspace
     if shift_pressed {
         let mut shift_up = INPUT::default();
         shift_up.ki.w_vk = VK_SHIFT as u16;
@@ -276,16 +276,6 @@ pub fn send_backspaces(count: usize) {
         up.ki.dw_flags = KEYEVENTF_KEYUP;
         up.ki.dw_extra_info = CUSTOM_INJECTED_SIGNATURE;
         inputs.push(up);
-    }
-
-    // 3. Restore Shift state if it was held
-    if shift_pressed {
-        let mut shift_down = INPUT::default();
-        shift_down.ki.w_vk = VK_SHIFT as u16;
-        shift_down.ki.w_scan = 0x2A;
-        shift_down.ki.dw_flags = 0;
-        shift_down.ki.dw_extra_info = CUSTOM_INJECTED_SIGNATURE;
-        inputs.push(shift_down);
     }
 
     unsafe {
