@@ -88,9 +88,9 @@ fn print_welcome_banner(config: &AppConfig) {
         TypingStyle::Modern => "Modern Unicode (ক+ি = কি)",
     };
 
-    println!("\x1b[1;35m====================================================================\x1b[0m");
-    println!("\x1b[1;32m  ⌨️   UniBijoy & English Native Keyboard (Pure Rust)\x1b[0m");
-    println!("\x1b[1;35m====================================================================\x1b[0m");
+    println!("\x1b[1;36m====================================================================\x1b[0m");
+    println!("\x1b[1;32m  ⌨️   Borno (বর্ণ) - Native UniBijoy & English Keyboard (Rust)\x1b[0m");
+    println!("\x1b[1;36m====================================================================\x1b[0m");
     println!("  \x1b[1mStatus:\x1b[0m System-wide Keyboard Active across ALL applications!");
     println!("  \x1b[1mActive Shortcut:\x1b[0m \x1b[1;33m{}\x1b[0m (Change anytime in config.ini)", shortcut_display);
     println!("  \x1b[1mTyping Style:\x1b[0m    \x1b[1;36m{}\x1b[0m", typing_style_display);
@@ -100,11 +100,11 @@ fn print_welcome_banner(config: &AppConfig) {
     println!("    • \x1b[36mস্বরবর্ণ:\x1b[0m Shift+F=অ, g+f=আ, g+d=ই, g+D=ঈ, g+s=উ, g+S=ঊ, g+a=ঋ, g+c=এ, g+C=ঐ, g+x=ও, g+X=ঔ");
     println!("    • \x1b[36mকার চিহ্ন:\x1b[0m f=া, d=ি, D=ী, s=ু, S=ূ, a=ৃ, c=ে, C=ৈ, x=ো, X=ৌ");
     println!("    • \x1b[36mযুক্তাক্ষর:\x1b[0m ক + g + ক = ক্ক, ত + g + ত = ত্ত, ব + g + ব = ব্ব, ক + z = ক্র, ক + Z = ক্য");
-    println!("    • \x1b[36mরেফ (র্):\x1b[0m   Shift+A (যেমন: Shift+A + m = র্ম)");
+    println!("    • \x1b[36mরেফ (র্):\x1b[0m   Shift+A (যেমন: j+m+Shift+A = কর্ম)");
     println!("    • \x1b[36mদাঁড়ি (।):\x1b[0m  Shift+G");
     println!("    • \x1b[36mটাকা (৳):\x1b[0m  Shift+4");
     println!("    • \x1b[36mখন্ড-ত (ৎ):\x1b[0m Shift+7");
     println!("    • \x1b[36mZWNJ / ZWJ:\x1b[0m ` (tilde key) / ~ (Shift + tilde key)");
-    println!("\x1b[1;35m====================================================================\x1b[0m");
+    println!("\x1b[1;36m====================================================================\x1b[0m");
     println!("  \x1b[90mSettings can be modified in 'config.ini'. Press Ctrl+C here to exit.\x1b[0m");
 }

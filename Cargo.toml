@@ -1,6 +1,8 @@
 [package]
-name = "bnkeyboard"
-version = "0.1.0"
+name = "borno"
+version = "1.0.0"
 edition = "2024"
+authors = ["Sunjil"]
+description = "Borno (বর্ণ) - Ultra-fast, lightweight native UniBijoy & English keyboard for Windows"
 
 [dependencies]

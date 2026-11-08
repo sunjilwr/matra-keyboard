@@ -1,10 +1,10 @@
 @echo off
-title UniBijoy Keyboard (Rust)
+title Borno (বর্ণ) Keyboard
 cd /d "%~dp0"
-if exist "target\release\bnkeyboard.exe" (
-    start "" "target\release\bnkeyboard.exe" %*
+if exist "target\release\borno.exe" (
+    start "" "target\release\borno.exe" %*
 ) else (
-    echo Building bnkeyboard release binary...
+    echo Building Borno release binary...
     cargo build --release
-    start "" "target\release\bnkeyboard.exe" %*
+    start "" "target\release\borno.exe" %*
 )

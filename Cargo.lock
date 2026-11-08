@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "bnkeyboard"
-version = "0.1.0"
+name = "borno"
+version = "1.0.0"
