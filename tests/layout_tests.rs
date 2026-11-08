@@ -171,8 +171,70 @@ mod tests {
         assert_eq!(engine.last_typed, borno::engine::LastTyped::Consonant("ম"));
         // 4. Type 'A' (0x41) with Shift held down -> triggers Reph replacement!
         assert!(engine.handle_key_down(0x41, true, false, false));
-        // Verify state after Reph
-        assert_eq!(engine.last_typed, borno::engine::LastTyped::Other);
+        // Verify state after Reph (now ConsonantCluster so ী or ে can attach!)
+        assert_eq!(engine.last_typed, borno::engine::LastTyped::ConsonantCluster);
+    }
+
+    #[test]
+    fn test_friendly_typing_sequence() {
+        let mut engine = Engine::new();
+        engine.mode = KeyboardMode::UniBijoy;
+        engine.sound_enabled = false;
+
+        // Modern phonetic sequence for "ফ্রেন্ডলি":
+        // 1. Shift + R (ফ)
+        assert!(engine.handle_key_down(0x52, true, false, false));
+        assert_eq!(engine.last_typed, borno::engine::LastTyped::Consonant("ফ"));
+
+        // 2. z (্র = ro-fola)
+        assert!(engine.handle_key_down(0x5A, false, false, false));
+        assert_eq!(engine.last_typed, borno::engine::LastTyped::ConsonantCluster);
+
+        // 3. c (ে = e-kar)
+        assert!(engine.handle_key_down(0x43, false, false, false));
+        assert_eq!(engine.last_typed, borno::engine::LastTyped::Kar);
+        assert!(engine.pending_kar.is_none()); // Crucial: NOT trapped in pending_kar!
+
+        // 4. b (ন)
+        assert!(engine.handle_key_down(0x42, false, false, false));
+        assert_eq!(engine.last_typed, borno::engine::LastTyped::Consonant("ন"));
+
+        // 5. g (link key)
+        assert!(engine.handle_key_down(0x47, false, false, false));
+        assert!(engine.link_active);
+
+        // 6. e (ড -> forms conjunct 'ন্ড')
+        assert!(engine.handle_key_down(0x45, false, false, false));
+        assert_eq!(engine.last_typed, borno::engine::LastTyped::ConsonantCluster);
+
+        // 7. Shift + V (ল)
+        assert!(engine.handle_key_down(0x56, true, false, false));
+        assert_eq!(engine.last_typed, borno::engine::LastTyped::Consonant("ল"));
+
+        // 8. d (ি = i-kar -> forms 'লি')
+        assert!(engine.handle_key_down(0x44, false, false, false));
+        assert_eq!(engine.last_typed, borno::engine::LastTyped::Kar);
+        assert!(engine.pending_kar.is_none());
+    }
+
+    #[test]
+    fn test_classic_visual_fola_transformation() {
+        let mut engine = Engine::new();
+        engine.mode = KeyboardMode::UniBijoy;
+        engine.sound_enabled = false;
+
+        // Classic sequence for "ফ্রে":
+        // 1. User types 'c' (ে) first
+        assert!(engine.handle_key_down(0x43, false, false, false));
+        assert_eq!(engine.pending_kar, Some("ে"));
+
+        // 2. User types Shift + R (ফ) -> outputs 'ফে', sets ConsonantWithPendingKar
+        assert!(engine.handle_key_down(0x52, true, false, false));
+        assert_eq!(engine.last_typed, borno::engine::LastTyped::ConsonantWithPendingKar { cons: "ফ", kar: "ে" });
+
+        // 3. User types 'z' (্র) -> auto-reorders 'ফে' + 'z' into 'ফ্রে'!
+        assert!(engine.handle_key_down(0x5A, false, false, false));
+        assert_eq!(engine.last_typed, borno::engine::LastTyped::Kar);
     }
 
     #[test]

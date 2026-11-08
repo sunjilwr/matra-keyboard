@@ -4,8 +4,8 @@
 
 use crate::config::TypingStyle;
 use crate::layout::{
-    get_pre_base_kar, is_bengali_consonant, map_link_vowel, map_unibijoy_key, KeyOutput,
-    KeyShiftState,
+    get_pre_base_kar, is_bengali_consonant, is_bengali_kar, map_link_vowel, map_unibijoy_key,
+    KeyOutput, KeyShiftState,
 };
 use crate::win32::*;
 
@@ -18,8 +18,29 @@ pub enum KeyboardMode {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LastTyped {
     None,
-    Consonant(&'static str), // e.g. "ম", "ক"
+    /// Single consonant (e.g. "ম", "ক", "ফ")
+    Consonant(&'static str),
+    /// Consonant cluster formed by fola (ro-fola, jo-fola) or conjunct (e.g. "ফ্র", "ন্ড", "ক্র")
+    ConsonantCluster,
+    /// A consonant where a pre-base Kar was attached via Classic visual typing (e.g. "ফে" from "c" + "Shift+R")
+    ConsonantWithPendingKar {
+        cons: &'static str,
+        kar: &'static str,
+    },
+    /// Vowel sign / Kar (e.g. ি, ী, ু, ূ, ৃ, ে, ৈ, ো, ৌ, া)
+    Kar,
     Other,
+}
+
+impl LastTyped {
+    pub fn is_consonant_base(&self) -> bool {
+        matches!(
+            self,
+            LastTyped::Consonant(_)
+                | LastTyped::ConsonantCluster
+                | LastTyped::ConsonantWithPendingKar { .. }
+        )
+    }
 }
 
 pub struct Engine {
@@ -151,14 +172,42 @@ impl Engine {
                 // Send Reph (\u{09B0}\u{09CD}) followed by the consonant
                 send_unicode_string("\u{09B0}\u{09CD}");
                 send_unicode_string(cons);
-                self.last_typed = LastTyped::Other;
+                self.last_typed = LastTyped::ConsonantCluster;
                 return true;
             }
         }
 
         // ====================================================================
-        // 2. LINK KEY 'g' ACTIVE: 'g + Kar' -> Vowel, or 'g + Consonant' -> Conjunct
+        // 2. FOLA ATTACHMENT: 'z' (ro-fola ্র), 'Shift+Z' (jo-fola ্য)
         // ====================================================================
+        if vk == 0x5A {
+            let fola = if is_shift { "\u{09CD}\u{09AF}" } else { "\u{09CD}\u{09B0}" };
+
+            // Classic visual typing order fix:
+            // User typed: 'c' (ে) + 'Shift+R' (ফ) -> screen has 'ফে'
+            // Now user presses 'z' (ro-fola ্র) -> should become 'ফ্রে'!
+            if let LastTyped::ConsonantWithPendingKar { cons: _, kar } = self.last_typed {
+                send_backspaces(1); // Erase the pending kar ('ে')
+                send_unicode_string(fola); // Send fola (্র / ্য)
+                send_unicode_string(kar); // Re-send the kar ('ে')
+                self.last_typed = LastTyped::Kar;
+                return true;
+            }
+
+            // Modern phonetic typing order:
+            // User typed consonant base (e.g. 'ফ') -> now presses 'z' (্র) -> outputs '্র'
+            // and marks last_typed as ConsonantCluster so subsequent Kar attaches to it!
+            if self.last_typed.is_consonant_base() {
+                send_unicode_string(fola);
+                self.last_typed = LastTyped::ConsonantCluster;
+                return true;
+            }
+        }
+
+        // ====================================================================
+        // 3. LINK KEY 'g' ACTIVE: 'g + Kar' -> Vowel, or 'g + Consonant' -> Conjunct
+        // ====================================================================
+        let mut was_conjunct_link = false;
         if self.link_active {
             // Check if this key forms a Swaroborno (Vowel) with 'g' (e.g. g+f=আ, g+d=ই, g+c=এ)
             if let Some(vowel) = map_link_vowel(vk, is_shift) {
@@ -175,18 +224,18 @@ impl Engine {
                 return true;
             }
 
-            // Otherwise, this is a conjunct (e.g. ক + g + ক = ক্ক)
-            // Send the Hasanta '্' and continue to process the next key
+            // Otherwise, this is a conjunct (e.g. ক + g + ক = ক্ক, ন + g + ড = ন্ড)
             send_unicode_string("\u{09CD}");
             self.link_active = false;
+            was_conjunct_link = true;
         }
 
         // ====================================================================
-        // 3. CLASSIC BIJOY VISUAL TYPING SUPPORT: 'ি + ক' -> 'কি'
+        // 4. CLASSIC BIJOY VISUAL TYPING SUPPORT: 'ি + ক' -> 'কি'
         // If typing_style == Classic and this key is a pre-base kar (ি, ে, ৈ, ো, ৌ),
-        // and last_typed was NOT a consonant (i.e. visual order at start of syllable):
+        // and last_typed was NOT a consonant base (i.e. visual order at start of syllable):
         // ====================================================================
-        let is_after_consonant = matches!(self.last_typed, LastTyped::Consonant(_));
+        let is_after_consonant = self.last_typed.is_consonant_base();
         if self.typing_style == TypingStyle::Classic && !is_after_consonant {
             if let Some(kar) = get_pre_base_kar(vk, is_shift) {
                 self.pending_kar = Some(kar);
@@ -195,7 +244,7 @@ impl Engine {
         }
 
         // ====================================================================
-        // 4. STANDARD UNIBIJOY KEY MAPPING
+        // 5. STANDARD UNIBIJOY KEY MAPPING
         // ====================================================================
         match map_unibijoy_key(vk, shift_state) {
             KeyOutput::Text(text) => {
@@ -207,7 +256,7 @@ impl Engine {
                         // User typed: ি + ক -> Output: ক + ি (কি)
                         send_unicode_string(text);
                         send_unicode_string(kar);
-                        self.last_typed = LastTyped::Other;
+                        self.last_typed = LastTyped::ConsonantWithPendingKar { cons: text, kar };
                         return true;
                     } else {
                         // Not a consonant, flush the kar first
@@ -217,8 +266,12 @@ impl Engine {
 
                 send_unicode_string(text);
 
-                if is_cons {
+                if was_conjunct_link && is_cons {
+                    self.last_typed = LastTyped::ConsonantCluster;
+                } else if is_cons {
                     self.last_typed = LastTyped::Consonant(text);
+                } else if is_bengali_kar(text) {
+                    self.last_typed = LastTyped::Kar;
                 } else {
                     self.last_typed = LastTyped::Other;
                 }

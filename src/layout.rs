@@ -168,6 +168,14 @@ pub fn get_pre_base_kar(vk: u32, is_shift: bool) -> Option<&'static str> {
     }
 }
 
+/// Check if a character string is a Bengali Kar / vowel sign
+pub fn is_bengali_kar(s: &str) -> bool {
+    matches!(
+        s,
+        "া" | "ি" | "ী" | "ু" | "ূ" | "ৃ" | "ে" | "ৈ" | "ো" | "ৌ"
+    )
+}
+
 /// Check if a character string is a Bengali consonant
 pub fn is_bengali_consonant(s: &str) -> bool {
     matches!(
