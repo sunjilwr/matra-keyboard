@@ -53,3 +53,4 @@ echo -e "${GREEN}===============================================================
 echo -e "${GREEN}  ✅ Matra (মাত্রা) installed successfully!${NC}"
 echo -e "${CYAN}  Launch it from your Applications menu or type 'matra' in terminal.${NC}"
 echo -e "${GREEN}====================================================================${NC}"
+

@@ -25,3 +25,4 @@ echo -e "${GREEN}===============================================================
 echo -e "${GREEN}  ✅ Matra.app installed to /Applications successfully!${NC}"
 echo -e "${CYAN}  You can launch it from Spotlight or Launchpad.${NC}"
 echo -e "${GREEN}====================================================================${NC}"
+

@@ -39,3 +39,4 @@ dpkg-deb --build "$DEB_DIR" "$PROJECT_ROOT/dist/${PKG_NAME}_${PKG_VERSION}_${ARC
 rm -rf "$DEB_DIR"
 
 echo "✅ Generated: dist/${PKG_NAME}_${PKG_VERSION}_${ARCH}.deb"
+

@@ -9,3 +9,4 @@ Description: Ultra-fast native Bangla & English keyboard
  Matra (মাত্রা) is an ultra-fast, lightweight native Bangla & English
  system-wide keyboard written in Pure Rust with zero bloatware.
  Features accurate conjunct handling, per-window mode, and silent operation.
+

@@ -57,3 +57,4 @@ if which hdiutil >/dev/null 2>&1; then
 else
     echo "hdiutil not available, app bundle prepared at: dist/${APP_NAME}.app"
 fi
+
