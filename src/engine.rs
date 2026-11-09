@@ -3,11 +3,28 @@
 // Reph after consonant, and key interception.
 
 use crate::config::TypingStyle;
+use crate::keys::*;
 use crate::layout::{
     get_pre_base_kar, is_bengali_consonant, is_bengali_kar, map_link_vowel, map_bangla_key,
     KeyOutput, KeyShiftState,
 };
+#[cfg(target_os = "windows")]
 use crate::win32::*;
+
+#[cfg(not(target_os = "windows"))]
+pub fn send_unicode_string(text: &str) {
+    print!("{}", text);
+}
+
+#[cfg(not(target_os = "windows"))]
+pub fn send_backspaces(count: usize) {
+    for _ in 0..count {
+        print!("\x08 \x08");
+    }
+}
+
+#[cfg(not(target_os = "windows"))]
+pub fn turn_caps_lock_off() {}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum KeyboardMode {
@@ -77,6 +94,7 @@ impl Engine {
         };
 
         // Play crisp, subtle confirmation beep
+        #[cfg(target_os = "windows")]
         if self.sound_enabled {
             match self.mode {
                 KeyboardMode::Bangla => {

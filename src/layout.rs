@@ -1,7 +1,8 @@
 // Matra Bangla Layout Definitions
 // Unicode Bengali standard mapping for English keyboard layout.
 
-use crate::win32::*;
+use crate::keys::*;
+
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum KeyShiftState {

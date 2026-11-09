@@ -2,7 +2,7 @@
 // Pure Rust implementation for Linux environments.
 
 use crate::config::AppConfig;
-use crate::engine::{Engine, KeyboardMode};
+use crate::engine::Engine;
 use std::sync::Mutex;
 
 pub static ENGINE: std::sync::LazyLock<Mutex<Engine>> = std::sync::LazyLock::new(|| {

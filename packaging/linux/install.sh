@@ -21,23 +21,36 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 # 1. Install binary
-if [ -f "$PROJECT_ROOT/target/release/matra" ]; then
+BIN_PATH=""
+if [ -f "$SCRIPT_DIR/matra" ]; then
+    BIN_PATH="$SCRIPT_DIR/matra"
+elif [ -f "$PROJECT_ROOT/target/x86_64-unknown-linux-musl/release/matra" ]; then
+    BIN_PATH="$PROJECT_ROOT/target/x86_64-unknown-linux-musl/release/matra"
+elif [ -f "$PROJECT_ROOT/target/release/matra" ]; then
+    BIN_PATH="$PROJECT_ROOT/target/release/matra"
+fi
+
+if [ -n "$BIN_PATH" ]; then
     echo "Installing binary to /usr/local/bin/matra..."
-    install -m 755 "$PROJECT_ROOT/target/release/matra" /usr/local/bin/matra
+    install -m 755 "$BIN_PATH" /usr/local/bin/matra
 else
-    echo -e "${RED}[ERROR] Release binary target/release/matra not found! Run 'cargo build --release' first.${NC}"
+    echo -e "${RED}[ERROR] Release binary 'matra' not found!${NC}"
     exit 1
 fi
 
 # 2. Install desktop launcher
 echo "Installing desktop launcher..."
 install -d /usr/share/applications
-install -m 644 "$SCRIPT_DIR/matra.desktop" /usr/share/applications/matra.desktop
+if [ -f "$SCRIPT_DIR/matra.desktop" ]; then
+    install -m 644 "$SCRIPT_DIR/matra.desktop" /usr/share/applications/matra.desktop
+fi
 
 # 3. Install application icon
 echo "Installing application icons..."
 install -d /usr/share/icons/hicolor/512x512/apps
-if [ -f "$PROJECT_ROOT/assets/logo.png" ]; then
+if [ -f "$SCRIPT_DIR/matra.png" ]; then
+    install -m 644 "$SCRIPT_DIR/matra.png" /usr/share/icons/hicolor/512x512/apps/matra.png
+elif [ -f "$PROJECT_ROOT/assets/logo.png" ]; then
     install -m 644 "$PROJECT_ROOT/assets/logo.png" /usr/share/icons/hicolor/512x512/apps/matra.png
 fi
 
