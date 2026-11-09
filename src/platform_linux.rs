@@ -31,3 +31,4 @@ pub fn run_linux(config: AppConfig) {
         std::thread::sleep(std::time::Duration::from_secs(3600));
     }
 }
+

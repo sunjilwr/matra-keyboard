@@ -48,10 +48,29 @@
 
 ## 💾 ইনস্টলেশন গাইড (Download & Installation)
 
-### সহজ ইনস্টলেশন (Recommended):
-1. [Releases](https://github.com/wrsunjil/matra-keyboard/releases) সেকশন থেকে **`MatraSetup-v1.0.0.exe`** ডাউনলোড করুন।
-2. ইনস্টলারে ডাবল ক্লিক করে ইনস্টল করুন। 
-3. ব্যস! স্টার্টআপেই মাত্রা স্বয়ংক্রিয়ভাবে সিস্টেম ট্রে-তে প্রস্তুত থাকবে।
+আপনার অপারেটিং সিস্টেম অনুযায়ী সরাসরি ইনস্টলার ডাউনলোড করুন:
+
+### 🪟 Windows (উইন্ডোজ ১০ ও ১১):
+1. [Releases](https://github.com/wrsunjil/matra-keyboard/releases) থেকে **`MatraSetup-v1.0.0.exe`** ডাউনলোড করুন।
+2. ফাইলটিতে ডাবল ক্লিক করে ইনস্টল সম্পন্ন করুন। স্টার্টআপে স্বয়ংক্রিয়ভাবে সিস্টেম ট্রে-তে যুক্ত হবে।
+
+### 🐧 Linux (Ubuntu, Debian, Mint):
+- **পদ্ধতি ১ (সরাসরি প্যাকেজ):** [Releases](https://github.com/wrsunjil/matra-keyboard/releases) থেকে **`matra_1.0.0_amd64.deb`** ডাউনলোড করে ডাবল ক্লিক করুন বা টার্মিনালে চালান:
+  ```bash
+  sudo dpkg -i matra_1.0.0_amd64.deb
+  ```
+- **পদ্ধতি ২ (অন্যান্য লিনাক্স ডিস্ট্রো - এক ক্লিকে ইনস্টল):**
+  ```bash
+  git clone https://github.com/wrsunjil/matra-keyboard.git
+  cd matra-keyboard && cargo build --release
+  sudo ./packaging/linux/install.sh
+  ```
+
+### 🍎 macOS (অ্যাপল ম্যাক):
+1. [Releases](https://github.com/wrsunjil/matra-keyboard/releases) থেকে **`Matra-v1.0.0.dmg`** ডাউনলোড করুন।
+2. ফাইলটি ওপেন করে `Matra.app` কে আপনার **Applications** ফোল্ডারে টেনে (Drag & Drop) ছেড়ে দিন।
+
+---
 
 ### সোর্স থেকে বিল্ড করতে চাইলে (For Developers):
 ```bash
