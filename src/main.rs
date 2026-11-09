@@ -1,27 +1,54 @@
-// Matra Bangla & English System-wide Keyboard for Windows
-// Written in Pure Rust with zero external dependencies.
+// Matra Bangla & English System-wide Keyboard
+// Cross-platform Pure Rust implementation for Windows, Linux & macOS
 
-#![windows_subsystem = "windows"]
+#![cfg_attr(target_os = "windows", windows_subsystem = "windows")]
 
-mod win32;
 mod config;
 mod layout;
 mod engine;
+
+#[cfg(target_os = "windows")]
+mod win32;
+#[cfg(target_os = "windows")]
 mod hook;
+#[cfg(target_os = "windows")]
 mod tray;
+#[cfg(target_os = "windows")]
 mod osd;
 
-use config::{AppConfig, ShortcutKey, TypingStyle};
-use win32::*;
-use hook::{install_hook, uninstall_hook, print_mode_banner, ENGINE, CONFIG};
-use tray::init_tray;
+#[cfg(target_os = "linux")]
+mod platform_linux;
 
-unsafe extern "system" fn ctrl_handler(_ctrl_type: u32) -> BOOL {
-    uninstall_hook();
+#[cfg(target_os = "macos")]
+mod platform_macos;
+
+use config::{AppConfig, ShortcutKey, TypingStyle};
+
+fn main() {
+    let config = AppConfig::load_or_create();
+
+    #[cfg(target_os = "windows")]
+    run_windows(config);
+
+    #[cfg(target_os = "linux")]
+    platform_linux::run_linux(config);
+
+    #[cfg(target_os = "macos")]
+    platform_macos::run_macos(config);
+}
+
+#[cfg(target_os = "windows")]
+unsafe extern "system" fn ctrl_handler(_ctrl_type: u32) -> win32::BOOL {
+    hook::uninstall_hook();
     1 // TRUE (handled)
 }
 
-fn main() {
+#[cfg(target_os = "windows")]
+fn run_windows(config: AppConfig) {
+    use win32::*;
+    use hook::{install_hook, uninstall_hook, print_mode_banner, ENGINE, CONFIG};
+    use tray::init_tray;
+
     // If run from a command prompt or PowerShell, attach to its console for logging
     unsafe {
         AttachConsole(0xFFFFFFFF); // ATTACH_PARENT_PROCESS
@@ -29,9 +56,6 @@ fn main() {
 
     // Enable ANSI colors if running in a console
     enable_ansi_colors();
-
-    // Load or create user configuration (config.ini)
-    let config = AppConfig::load_or_create();
 
     // Apply config to typing engine and window manager
     {

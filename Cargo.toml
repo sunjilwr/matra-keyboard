@@ -3,6 +3,6 @@ name = "matra"
 version = "1.0.0"
 edition = "2024"
 authors = ["Sunjil"]
-description = "Matra (মাত্রা) - Ultra-fast, lightweight native Bangla & English keyboard for Windows"
+description = "Matra (মাত্রা) - Ultra-fast, lightweight native Bangla & English keyboard for Windows, Linux & macOS"
 
 [dependencies]

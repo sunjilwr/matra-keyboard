@@ -3,15 +3,16 @@
 <p align="center">
   <img src="assets/logo.png" alt="Matra Logo" width="128" height="128" />
   <br>
-  <b>Matra (মাত্রা)</b> হলো উইন্ডোজের জন্য সম্পূর্ণ <b>Pure Rust</b> দিয়ে তৈরি একটি আধুনিক, দ্রুতগতির এবং ওপেন সোর্স সিস্টেম-ওয়াইড বাংলা কীবোর্ড।
+  <b>Matra (মাত্রা)</b> হলো সম্পূর্ণ <b>Pure Rust</b> দিয়ে তৈরি একটি আধুনিক, দ্রুতগতির এবং ওপেন সোর্স ক্রস-প্ল্যাটফর্ম বাংলা কীবোর্ড (Windows, Linux, macOS)।
   <br>
-  <i>Zero external crates • 0ms latency • No bloatware • Pure Win32 API</i>
+  <i>Cross-Platform • Zero external crates • 0ms latency • No bloatware • Pure Rust</i>
 </p>
 
 <p align="center">
   <a href="https://github.com/wrsunjil/matra-keyboard/releases"><img src="https://img.shields.io/badge/Download-Installer%20v1.0.0-emerald?style=for-the-badge&logo=windows" alt="Download Matra" /></a>
+  <img src="https://img.shields.io/badge/Platform-Windows%20|%20Linux%20|%20macOS-blue?style=for-the-badge" alt="Platforms" />
   <img src="https://img.shields.io/badge/Language-Rust-orange?style=for-the-badge&logo=rust" alt="Rust" />
-  <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="MIT License" />
+  <img src="https://img.shields.io/badge/License-MIT-purple?style=for-the-badge" alt="MIT License" />
 </p>
 
 ---
@@ -58,7 +59,9 @@ git clone https://github.com/wrsunjil/matra-keyboard.git
 cd matra-keyboard
 cargo build --release
 ```
-তৈরি হওয়া `target/release/matra.exe` সরাসরি যেকোনো জায়গায় নিয়ে চালানো যাবে।
+- **Windows:** তৈরি হওয়া `target/release/matra.exe` সরাসরি রান করা যাবে।
+- **Linux:** তৈরি হওয়া `target/release/matra` এক্সিকিউটেবল হিসেবে চলবে (`chmod +x target/release/matra`).
+- **macOS:** তৈরি হওয়া `target/release/matra` যেকোনো ম্যাক (Apple Silicon / Intel)-এ রান করা যাবে।
 
 ---
 
