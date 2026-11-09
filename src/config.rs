@@ -1,4 +1,4 @@
-// Configuration management for Borno
+// Configuration management for Matra
 // Reads and writes user preferences to a simple, human-editable 'config.ini' file.
 
 use std::fs;
@@ -126,7 +126,7 @@ impl AppConfig {
 
         let content = format!(
 r#"# ====================================================================
-# Borno Keyboard Configuration File (ইউজার কনফিগারেশন)
+# Matra Keyboard Configuration File (ইউজার কনফিগারেশন)
 # ====================================================================
 
 # Language switch shortcut (English <-> Bangla)

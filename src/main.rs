@@ -1,4 +1,4 @@
-// Borno Bangla & English System-wide Keyboard for Windows
+// Matra Bangla & English System-wide Keyboard for Windows
 // Written in Pure Rust with zero external dependencies.
 
 #![windows_subsystem = "windows"]
@@ -105,7 +105,7 @@ fn print_welcome_banner(config: &AppConfig) {
     };
 
     println!("\x1b[1;36m====================================================================\x1b[0m");
-    println!("\x1b[1;32m  ⌨️   Borno (বর্ণ) - Native Bangla & English Keyboard (Rust)\x1b[0m");
+    println!("\x1b[1;32m  ⌨️   Matra (মাত্রা) - Native Bangla & English Keyboard (Rust)\x1b[0m");
     println!("\x1b[1;36m====================================================================\x1b[0m");
     println!("  \x1b[1mStatus:\x1b[0m System-wide Keyboard Active across ALL applications!");
     println!("  \x1b[1mActive Shortcut:\x1b[0m \x1b[1;33m{}\x1b[0m (Change anytime in config.ini)", shortcut_display);

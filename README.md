@@ -1,15 +1,15 @@
-# ⌨️ Borno (বর্ণ) - Ultra-Lightweight Bangla & English Keyboard
+# ⌨️ Matra (মাত্রা) - Ultra-Lightweight Bangla & English Keyboard
 
 <p align="center">
-  <img src="assets/logo.png" alt="Borno Logo" width="128" height="128" />
+  <img src="assets/logo.png" alt="Matra Logo" width="128" height="128" />
   <br>
-  <b>Borno (বর্ণ)</b> হলো উইন্ডোজের জন্য সম্পূর্ণ <b>Pure Rust</b> দিয়ে তৈরি একটি আধুনিক, দ্রুতগতির এবং ওপেন সোর্স সিস্টেম-ওয়াইড বাংলা কীবোর্ড।
+  <b>Matra (মাত্রা)</b> হলো উইন্ডোজের জন্য সম্পূর্ণ <b>Pure Rust</b> দিয়ে তৈরি একটি আধুনিক, দ্রুতগতির এবং ওপেন সোর্স সিস্টেম-ওয়াইড বাংলা কীবোর্ড।
   <br>
   <i>Zero external crates • 0ms latency • No bloatware • Pure Win32 API</i>
 </p>
 
 <p align="center">
-  <a href="https://github.com/wrsunjil/borno-keyboard/releases"><img src="https://img.shields.io/badge/Download-Installer%20v1.0.0-emerald?style=for-the-badge&logo=windows" alt="Download Borno" /></a>
+  <a href="https://github.com/wrsunjil/matra-keyboard/releases"><img src="https://img.shields.io/badge/Download-Installer%20v1.0.0-emerald?style=for-the-badge&logo=windows" alt="Download Matra" /></a>
   <img src="https://img.shields.io/badge/Language-Rust-orange?style=for-the-badge&logo=rust" alt="Rust" />
   <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="MIT License" />
 </p>
@@ -48,17 +48,17 @@
 ## 💾 ইনস্টলেশন গাইড (Download & Installation)
 
 ### সহজ ইনস্টলেশন (Recommended):
-1. [Releases](https://github.com/wrsunjil/borno-keyboard/releases) সেকশন থেকে **`BornoSetup-v1.0.0.exe`** ডাউনলোড করুন।
+1. [Releases](https://github.com/wrsunjil/matra-keyboard/releases) সেকশন থেকে **`MatraSetup-v1.0.0.exe`** ডাউনলোড করুন।
 2. ইনস্টলারে ডাবল ক্লিক করে ইনস্টল করুন। 
-3. ব্যস! স্টার্টআপেই বর্ণ স্বয়ংক্রিয়ভাবে সিস্টেম ট্রে-তে প্রস্তুত থাকবে।
+3. ব্যস! স্টার্টআপেই মাত্রা স্বয়ংক্রিয়ভাবে সিস্টেম ট্রে-তে প্রস্তুত থাকবে।
 
 ### সোর্স থেকে বিল্ড করতে চাইলে (For Developers):
 ```bash
-git clone https://github.com/wrsunjil/borno-keyboard.git
-cd borno-keyboard
+git clone https://github.com/wrsunjil/matra-keyboard.git
+cd matra-keyboard
 cargo build --release
 ```
-তৈরি হওয়া `target/release/borno.exe` সরাসরি যেকোনো জায়গায় নিয়ে চালানো যাবে।
+তৈরি হওয়া `target/release/matra.exe` সরাসরি যেকোনো জায়গায় নিয়ে চালানো যাবে।
 
 ---
 

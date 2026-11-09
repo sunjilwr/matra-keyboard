@@ -1,4 +1,4 @@
-// Modern Floating On-Screen Display (OSD) Badge for Borno (বর্ণ)
+// Modern Floating On-Screen Display (OSD) Badge for Matra (মাত্রা)
 // Displays a sleek, minimalist "BN" / "EN" pill next to the text cursor
 // without taking focus or disrupting typing. Zero external dependencies.
 
@@ -132,8 +132,8 @@ pub unsafe extern "system" fn osd_window_proc(
 
 pub fn init_osd() -> HWND {
     unsafe {
-        let class_name = to_wide_string("BornoOSDClass");
-        let window_name = to_wide_string("Borno OSD Window");
+        let class_name = to_wide_string("MatraOSDClass");
+        let window_name = to_wide_string("Matra OSD Window");
         let h_instance = GetModuleHandleW(std::ptr::null());
 
         let mut wnd_class: WNDCLASSEXW = std::mem::zeroed();

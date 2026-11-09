@@ -1,4 +1,4 @@
-// Typing Engine for Borno Bangla
+// Typing Engine for Matra Bangla
 // Handles stateful typing: Link key ('g'), conjuncts, vowel forming, Classic/Modern Kar typing,
 // Reph after consonant, and key interception.
 

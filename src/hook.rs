@@ -1,5 +1,5 @@
 // Low-Level Windows Keyboard Hook (WH_KEYBOARD_LL)
-// Intercepts keys globally across all Windows applications and routes them to the Borno Bangla engine.
+// Intercepts keys globally across all Windows applications and routes them to the Matra Bangla engine.
 
 use std::collections::HashMap;
 use std::sync::{LazyLock, Mutex};

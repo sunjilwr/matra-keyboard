@@ -27,5 +27,5 @@ jobs:
       - name: Upload Windows Executable
         uses: actions/upload-artifact@v4
         with:
-          name: borno-windows-x64
-          path: target/release/borno.exe
+          name: matra-windows-x64
+          path: target/release/matra.exe

@@ -1,15 +1,15 @@
-; Inno Setup Script for Borno (বর্ণ) Keyboard
-; Generates a professional standalone Windows installer executable (BornoSetup.exe)
+; Inno Setup Script for Matra (মাত্রা) Keyboard
+; Generates a professional standalone Windows installer executable (MatraSetup.exe)
 
-#define MyAppName "Borno"
+#define MyAppName "Matra"
 #define MyAppVersion "1.0.0"
 #define MyAppPublisher "Sunjil"
-#define MyAppURL "https://github.com/wrsunjil/borno-keyboard"
-#define MyAppExeName "borno.exe"
+#define MyAppURL "https://github.com/wrsunjil/matra-keyboard"
+#define MyAppExeName "matra.exe"
 
 [Setup]
 AppId={{5D8C3E91-912A-4B28-A4F7-1B98F56D2C42}
-AppName={#MyAppName} (বর্ণ)
+AppName={#MyAppName} (মাত্রা)
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
@@ -19,7 +19,7 @@ DefaultDirName={autopf}\{#MyAppName}
 DisableProgramGroupPage=yes
 LicenseFile=README.md
 OutputDir=dist
-OutputBaseFilename=BornoSetup-v1.0.0
+OutputBaseFilename=MatraSetup-v1.0.0
 SetupIconFile=assets\icon.ico
 Compression=lzma2/ultra64
 SolidCompression=yes
@@ -27,14 +27,14 @@ WizardStyle=modern
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 CloseApplications=yes
-CloseApplicationsFilter=borno.exe
+CloseApplicationsFilter=matra.exe
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
-Name: "startwithwindows"; Description: "Automatically start Borno when Windows starts (System Tray)"; GroupDescription: "Startup Options:"; Flags: checkedonce
+Name: "startwithwindows"; Description: "Automatically start Matra when Windows starts (System Tray)"; GroupDescription: "Startup Options:"; Flags: checkedonce
 
 [Files]
 Source: "target\release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion

@@ -1,4 +1,4 @@
-// System Tray Integration for Borno (বর্ণ)
+// System Tray Integration for Matra (মাত্রা)
 // Creates a native Windows Notification Area (System Tray) icon with right-click menu,
 // tooltips, and click-to-toggle capability without needing any external crates.
 
@@ -116,8 +116,8 @@ pub unsafe extern "system" fn tray_window_proc(
 
 pub fn init_tray(mode: KeyboardMode) -> HWND {
     unsafe {
-        let class_name = to_wide_string("BornoTrayClass");
-        let window_name = to_wide_string("Borno Tray Window");
+        let class_name = to_wide_string("MatraTrayClass");
+        let window_name = to_wide_string("Matra Tray Window");
         let h_instance = GetModuleHandleW(std::ptr::null());
 
         let mut wnd_class: WNDCLASSEXW = std::mem::zeroed();
@@ -159,11 +159,11 @@ pub fn add_tray_icon(hwnd: HWND, mode: KeyboardMode) {
         nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP | NIF_INFO;
         nid.uCallbackMessage = WM_TRAYICON;
 
-        let tip = format!("Borno (বর্ণ) - {}", mode_name(mode));
+        let tip = format!("Matra (মাত্রা) - {}", mode_name(mode));
         copy_to_wide_array(&tip, &mut nid.szTip);
 
         // Friendly startup balloon notification
-        let title = "Borno (বর্ণ) Keyboard Active";
+        let title = "Matra (মাত্রা) Keyboard Active";
         let info = "Press Ctrl + \\ to switch language anytime.\nRight-click icon for options.";
         copy_to_wide_array(title, &mut nid.szInfoTitle);
         copy_to_wide_array(info, &mut nid.szInfo);
@@ -182,7 +182,7 @@ pub fn update_tray_tooltip(hwnd: HWND, mode: KeyboardMode) {
         let mut nid = make_nid(hwnd, h_icon);
         nid.uFlags = NIF_TIP | NIF_ICON;
 
-        let tip = format!("Borno (বর্ণ) - {}", mode_name(mode));
+        let tip = format!("Matra (মাত্রা) - {}", mode_name(mode));
         copy_to_wide_array(&tip, &mut nid.szTip);
 
         Shell_NotifyIconW(NIM_MODIFY, &mut nid);
@@ -223,7 +223,7 @@ unsafe fn show_tray_menu(hwnd: HWND) {
     let w_toggle = to_wide_string(toggle_label);
     let w_config = to_wide_string("⚙ Settings (config.ini)");
     let w_about = to_wide_string("📖 Keyboard Cheat-Sheet (README)");
-    let w_exit = to_wide_string("❌ Exit Borno");
+    let w_exit = to_wide_string("❌ Exit Matra");
 
     unsafe {
         AppendMenuW(h_menu, 0x0000, ID_TRAY_TOGGLE, w_toggle.as_ptr());

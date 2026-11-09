@@ -1,5 +1,5 @@
 fn main() {
-    println!("cargo:rerun-if-changed=borno.rc");
+    println!("cargo:rerun-if-changed=matra.rc");
     println!("cargo:rerun-if-changed=assets/icon.ico");
 
     let target = std::env::var("TARGET").unwrap_or_default();
@@ -12,9 +12,9 @@ fn main() {
         for rc_path in rc_candidates {
             if std::path::Path::new(rc_path).exists() {
                 let out_dir = std::env::var("OUT_DIR").unwrap();
-                let res_file = format!("{}\\borno.res", out_dir);
+                let res_file = format!("{}\\matra.res", out_dir);
                 let status = std::process::Command::new(rc_path)
-                    .args(&["/fo", &res_file, "borno.rc"])
+                    .args(&["/fo", &res_file, "matra.rc"])
                     .status();
 
                 if let Ok(s) = status {

@@ -1,4 +1,4 @@
-// Borno Bangla Layout Definitions
+// Matra Bangla Layout Definitions
 // Unicode Bengali standard mapping for English keyboard layout.
 
 use crate::win32::*;
@@ -11,7 +11,7 @@ pub enum KeyShiftState {
     ShiftAltGr,
 }
 
-/// Represents the mapped output of a key in Borno Bangla layout
+/// Represents the mapped output of a key in Matra Bangla layout
 #[derive(Debug, Clone)]
 pub enum KeyOutput {
     /// Direct text/character output
@@ -22,7 +22,7 @@ pub enum KeyOutput {
     PassThrough,
 }
 
-/// Get the mapped output for a virtual key code in Borno Bangla layout
+/// Get the mapped output for a virtual key code in Matra Bangla layout
 pub fn map_bangla_key(vk: u32, state: KeyShiftState) -> KeyOutput {
     match state {
         KeyShiftState::AltGr => match vk {
