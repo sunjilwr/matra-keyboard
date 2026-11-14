@@ -164,3 +164,4 @@ with open(deb_path, "wb") as f:
     f.write(make_ar_member("data.tar.gz", data_tar_gz))
 
 print(f"Generated: {deb_path} ({os.path.getsize(deb_path)} bytes)")
+

@@ -18,3 +18,4 @@ Written in 100% Pure Rust with zero external crates. Ultra-fast, bloatware-free,
 | 🐧 **Linux (Debian/Ubuntu/Mint)** | [**matra_1.0.0_amd64.deb**](https://github.com/wrsunjil/matra-keyboard/releases/download/v1.0.0/matra_1.0.0_amd64.deb) | One-click `.deb` package (`sudo dpkg -i`) |
 | 🐧 **Linux (Generic x86_64)** | [**matra-linux-x64.tar.gz**](https://github.com/wrsunjil/matra-keyboard/releases/download/v1.0.0/matra-linux-x64.tar.gz) | Statically linked binary + `install.sh` |
 | 🍎 **macOS** | [**Matra-macOS-v1.0.0.zip**](https://github.com/wrsunjil/matra-keyboard/releases/download/v1.0.0/Matra-macOS-v1.0.0.zip) | macOS `Matra.app` bundle + installer |
+

@@ -35,3 +35,4 @@ with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
         add_data("Matra-macOS/README.md", f.read().replace(b"\r\n", b"\n"), 0o644)
 
 print(f"Generated: {zip_path} ({os.path.getsize(zip_path)} bytes)")
+
