@@ -1,4 +1,5 @@
 // Standard Virtual Key Codes (Cross-Platform Key Mapping Definitions)
+#![allow(dead_code)]
 
 pub const VK_BACK: i32 = 0x08;
 pub const VK_TAB: i32 = 0x09;

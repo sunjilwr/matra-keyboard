@@ -9,7 +9,7 @@ use crate::layout::{
     KeyOutput, KeyShiftState,
 };
 #[cfg(target_os = "windows")]
-use crate::win32::*;
+use crate::win32::{Beep, send_backspaces, send_unicode_string, turn_caps_lock_off};
 
 #[cfg(not(target_os = "windows"))]
 pub fn send_unicode_string(text: &str) {
@@ -131,7 +131,21 @@ impl Engine {
 
     /// Handle a key down event.
     /// Returns `true` if the event was handled and should be suppressed from the OS.
+    #[allow(dead_code)]
     pub fn handle_key_down(&mut self, vk: u32, is_shift: bool, is_alt: bool, is_ctrl: bool) -> bool {
+        self.handle_key_down_with_modifiers(vk, is_shift, is_alt, is_ctrl, false)
+    }
+
+    /// Handle a key down event including Windows/Super key state.
+    /// Returns `true` if the event was handled and should be suppressed from the OS.
+    pub fn handle_key_down_with_modifiers(
+        &mut self,
+        vk: u32,
+        is_shift: bool,
+        is_alt: bool,
+        is_ctrl: bool,
+        is_win: bool,
+    ) -> bool {
         // If in English mode, do nothing - 100% passthrough
         if self.mode == KeyboardMode::English {
             return false;
@@ -143,11 +157,15 @@ impl Engine {
             return false;
         }
 
-        // Allow system shortcuts (Ctrl+C, Ctrl+V, Win+Key, Alt+Tab, etc.) to pass through untouched
+        // Allow system shortcuts (Ctrl+C, Ctrl+V, Win+V, Win+Key, Alt+Tab, etc.) to pass through untouched
         let is_alt_gr = is_ctrl && is_alt;
-        if (is_ctrl && !is_alt_gr) || (is_alt && !is_alt_gr) {
-            self.flush_pending_states();
-            self.last_typed = LastTyped::Other;
+        if is_win || (is_ctrl && !is_alt_gr) || (is_alt && !is_alt_gr) {
+            if is_win {
+                self.reset_state();
+            } else {
+                self.flush_pending_states();
+                self.last_typed = LastTyped::Other;
+            }
             return false;
         }
 

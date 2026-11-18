@@ -2,10 +2,13 @@
 // Intercepts keys globally across all Windows applications and routes them to the Matra Bangla engine.
 
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{LazyLock, Mutex};
 use crate::config::{AppConfig, ShortcutKey};
 use crate::engine::{Engine, KeyboardMode};
 use crate::win32::*;
+
+static SUPPRESSED_KEYS: [AtomicBool; 256] = [const { AtomicBool::new(false) }; 256];
 
 pub struct WindowStateManager {
     pub enabled: bool,
@@ -83,6 +86,7 @@ pub unsafe extern "system" fn low_level_keyboard_proc(
 
     let is_ctrl = is_key_pressed(VK_CONTROL);
     let is_alt = is_key_pressed(VK_MENU);
+    let is_win = is_key_pressed(VK_LWIN) || is_key_pressed(VK_RWIN);
 
     // Sync active mode with currently focused window (Per-Window State)
     let current_hwnd = get_active_window_handle();
@@ -125,7 +129,9 @@ pub unsafe extern "system" fn low_level_keyboard_proc(
     let is_shift = is_key_pressed(VK_SHIFT) || (engine_mode == KeyboardMode::Bangla && is_caps_down);
 
     // Check for Language Switch Hotkey on KeyDown
-    let is_toggle_key = {
+    let is_toggle_key = if is_win {
+        false
+    } else {
         let cfg_guard = CONFIG.lock().unwrap();
         if let Some(cfg) = cfg_guard.as_ref() {
             match cfg.shortcut {
@@ -174,41 +180,23 @@ pub unsafe extern "system" fn low_level_keyboard_proc(
     // Process normal keystrokes
     if is_key_down {
         let mut engine = ENGINE.lock().unwrap();
-        if engine.handle_key_down(kbd.vk_code, is_shift, is_alt, is_ctrl) {
+        if engine.handle_key_down_with_modifiers(kbd.vk_code, is_shift, is_alt, is_ctrl, is_win) {
+            if (kbd.vk_code as usize) < 256 {
+                SUPPRESSED_KEYS[kbd.vk_code as usize].store(true, Ordering::Relaxed);
+            }
             return 1; // Suppress the physical key from reaching the foreground application
+        } else if (kbd.vk_code as usize) < 256 {
+            SUPPRESSED_KEYS[kbd.vk_code as usize].store(false, Ordering::Relaxed);
         }
     } else if is_key_up {
-        let engine = ENGINE.lock().unwrap();
-        if engine.mode == KeyboardMode::Bangla {
-            // If in Bangla mode and not holding Ctrl/Alt, suppress the character keyup
-            let is_alt_gr = is_ctrl && is_alt;
-            if (!is_ctrl && !is_alt) || is_alt_gr {
-                // If it's a typing key that Bangla intercepts, suppress KeyUp too
-                if is_typing_key(kbd.vk_code) {
-                    return 1;
-                }
-            }
+        if (kbd.vk_code as usize) < 256
+            && SUPPRESSED_KEYS[kbd.vk_code as usize].swap(false, Ordering::Relaxed)
+        {
+            return 1;
         }
     }
 
     unsafe { CallNextHookEx(HOOK_HANDLE, n_code, w_param, l_param) }
-}
-
-fn is_typing_key(vk: u32) -> bool {
-    (vk >= 0x30 && vk <= 0x39) // 0-9
-        || (vk >= 0x41 && vk <= 0x5A) // A-Z
-        || (vk >= 0x60 && vk <= 0x6F) // Numpad
-        || vk == VK_OEM_1 as u32
-        || vk == VK_OEM_PLUS as u32
-        || vk == VK_OEM_COMMA as u32
-        || vk == VK_OEM_MINUS as u32
-        || vk == VK_OEM_PERIOD as u32
-        || vk == VK_OEM_2 as u32
-        || vk == VK_OEM_3 as u32
-        || vk == VK_OEM_4 as u32
-        || vk == VK_OEM_5 as u32
-        || vk == VK_OEM_6 as u32
-        || vk == VK_OEM_7 as u32
 }
 
 pub fn print_mode_banner(mode: KeyboardMode) {

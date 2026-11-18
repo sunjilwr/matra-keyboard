@@ -278,4 +278,20 @@ mod tests {
         let mut disabled_wsm = WindowStateManager::new(false);
         assert_eq!(disabled_wsm.sync_active_window(101), None);
     }
+
+    #[test]
+    fn test_win_v_clipboard_shortcut_passthrough() {
+        let mut engine = Engine::new();
+        engine.mode = KeyboardMode::Bangla;
+        engine.sound_enabled = false;
+
+        // Without Win key: 'v' (0x56) is intercepted by Bangla engine (types 'র')
+        assert!(engine.handle_key_down_with_modifiers(0x56, false, false, false, false));
+
+        // With Win key held (Win + V for Windows Clipboard History):
+        // 1. LWin keydown (0x5B) passes through
+        assert!(!engine.handle_key_down_with_modifiers(0x5B, false, false, false, true));
+        // 2. 'V' keydown (0x56) with is_win=true MUST pass through untouched (returns false)
+        assert!(!engine.handle_key_down_with_modifiers(0x56, false, false, false, true));
+    }
 }

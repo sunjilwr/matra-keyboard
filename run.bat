@@ -1,10 +1,10 @@
 @echo off
-title Borno (বর্ণ) Keyboard
+title Matra (মাত্রা) Keyboard
 cd /d "%~dp0"
-if exist "target\release\borno.exe" (
-    start "" "target\release\borno.exe" %*
+if exist "target\release\matra.exe" (
+    start "" "target\release\matra.exe" %*
 ) else (
-    echo Building Borno release binary...
+    echo Building Matra release binary...
     cargo build --release
-    start "" "target\release\borno.exe" %*
+    start "" "target\release\matra.exe" %*
 )
