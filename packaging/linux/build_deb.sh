@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 PKG_NAME="matra"
-PKG_VERSION="1.0.0"
+PKG_VERSION="1.1.0"
 ARCH="amd64"
 DEB_DIR="$PROJECT_ROOT/dist/${PKG_NAME}_${PKG_VERSION}_${ARCH}"
 

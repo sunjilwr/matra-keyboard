@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 APP_NAME="Matra"
-VERSION="1.0.0"
+VERSION="1.1.0"
 DMG_NAME="Matra-v${VERSION}.dmg"
 APP_BUNDLE="$PROJECT_ROOT/dist/${APP_NAME}.app"
 DMG_DIR="$PROJECT_ROOT/dist/dmg_staging"

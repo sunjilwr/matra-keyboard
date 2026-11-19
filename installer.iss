@@ -2,7 +2,7 @@
 ; Generates a professional standalone Windows installer executable (MatraSetup.exe)
 
 #define MyAppName "Matra"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.1.0"
 #define MyAppPublisher "Sunjil"
 #define MyAppURL "https://github.com/wrsunjil/matra-keyboard"
 #define MyAppExeName "matra.exe"
@@ -19,7 +19,7 @@ DefaultDirName={autopf}\{#MyAppName}
 DisableProgramGroupPage=yes
 LicenseFile=README.md
 OutputDir=dist
-OutputBaseFilename=MatraSetup-v1.0.0
+OutputBaseFilename=MatraSetup-v1.1.0
 SetupIconFile=assets\icon.ico
 Compression=lzma2/ultra64
 SolidCompression=yes

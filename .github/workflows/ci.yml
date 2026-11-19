@@ -16,18 +16,18 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            artifact_name: MatraSetup-Windows-v1.0.0
-            installer_path: dist/MatraSetup-v1.0.0.exe
+            artifact_name: MatraSetup-Windows-v1.1.0
+            installer_path: dist/MatraSetup-v1.1.0.exe
             pkg_script: powershell -NoProfile -ExecutionPolicy Bypass -Command "& 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' installer.iss"
 
           - os: ubuntu-latest
-            artifact_name: matra-linux-deb-v1.0.0
-            installer_path: dist/matra_1.0.0_amd64.deb
+            artifact_name: matra-linux-deb-v1.1.0
+            installer_path: dist/matra_1.1.0_amd64.deb
             pkg_script: bash packaging/linux/build_deb.sh
 
           - os: macos-latest
-            artifact_name: Matra-macOS-DMG-v1.0.0
-            installer_path: dist/Matra-v1.0.0.dmg
+            artifact_name: Matra-macOS-DMG-v1.1.0
+            installer_path: dist/Matra-v1.1.0.dmg
             pkg_script: bash packaging/macos/build_dmg.sh
 
     steps:
