@@ -254,6 +254,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(target_os = "windows")]
     fn test_per_window_state_manager() {
         use matra::hook::WindowStateManager;
 
@@ -298,6 +299,7 @@ mod tests {
     #[test]
     fn test_smart_coding_mode_detection_and_auto_english() {
         use matra::engine::{classify_window_context, WindowContext};
+        #[cfg(target_os = "windows")]
         use matra::hook::WindowStateManager;
 
         // 1. Detect Antigravity IDE and pubspec.yaml from screenshot
@@ -351,41 +353,47 @@ mod tests {
 
         // Two-way Chat Zone geometry test:
         // Clicking inside AI chat box stays within zone; clicking Code Editor is outside zone
-        assert!(matra::hook::is_point_in_chat_zone(1600, 920, 1550, 900));
-        assert!(!matra::hook::is_point_in_chat_zone(650, 420, 1550, 900));
+        #[cfg(target_os = "windows")]
+        {
+            assert!(matra::hook::is_point_in_chat_zone(1600, 920, 1550, 900));
+            assert!(!matra::hook::is_point_in_chat_zone(650, 420, 1550, 900));
+        }
 
         // Scenario C: Switching file tabs in IDE auto-switches to English, while dirty marker '●' does not!
-        let mut wsm = WindowStateManager::new(true);
-        assert_eq!(
-            wsm.sync_active_window_with_context(
-                500,
-                "plant_identify - Antigravity IDE - pubspec.yaml",
-                WindowContext::CodingIde,
-                true
-            ),
-            Some(KeyboardMode::English)
-        );
-        wsm.set_mode_for_window(500, KeyboardMode::Bangla);
-        // Dirty marker '●' added while typing -> should NOT reset to English
-        assert_eq!(
-            wsm.sync_active_window_with_context(
-                500,
-                "plant_identify - Antigravity IDE - pubspec.yaml●",
-                WindowContext::CodingIde,
-                true
-            ),
-            None
-        );
-        // User switches tab to ad_helper.dart -> automatically switches to English!
-        assert_eq!(
-            wsm.sync_active_window_with_context(
-                500,
-                "plant_identify - Antigravity IDE - ad_helper.dart",
-                WindowContext::CodingIde,
-                true
-            ),
-            Some(KeyboardMode::English)
-        );
+        #[cfg(target_os = "windows")]
+        {
+            let mut wsm = WindowStateManager::new(true);
+            assert_eq!(
+                wsm.sync_active_window_with_context(
+                    500,
+                    "plant_identify - Antigravity IDE - pubspec.yaml",
+                    WindowContext::CodingIde,
+                    true
+                ),
+                Some(KeyboardMode::English)
+            );
+            wsm.set_mode_for_window(500, KeyboardMode::Bangla);
+            // Dirty marker '●' added while typing -> should NOT reset to English
+            assert_eq!(
+                wsm.sync_active_window_with_context(
+                    500,
+                    "plant_identify - Antigravity IDE - pubspec.yaml●",
+                    WindowContext::CodingIde,
+                    true
+                ),
+                None
+            );
+            // User switches tab to ad_helper.dart -> automatically switches to English!
+            assert_eq!(
+                wsm.sync_active_window_with_context(
+                    500,
+                    "plant_identify - Antigravity IDE - ad_helper.dart",
+                    WindowContext::CodingIde,
+                    true
+                ),
+                Some(KeyboardMode::English)
+            );
+        }
     }
 
     #[test]
