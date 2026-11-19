@@ -90,11 +90,24 @@ pub struct KBDLLHOOKSTRUCT {
     pub extra_info: usize,
 }
 
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct MSLLHOOKSTRUCT {
+    pub pt: POINT,
+    pub mouse_data: u32,
+    pub flags: u32,
+    pub time: u32,
+    pub extra_info: usize,
+}
+
 pub const WH_KEYBOARD_LL: i32 = 13;
+pub const WH_MOUSE_LL: i32 = 14;
 pub const WM_KEYDOWN: u32 = 0x0100;
 pub const WM_KEYUP: u32 = 0x0101;
 pub const WM_SYSKEYDOWN: u32 = 0x0104;
 pub const WM_SYSKEYUP: u32 = 0x0105;
+pub const WM_LBUTTONDOWN: u32 = 0x0201;
+pub const WM_RBUTTONDOWN: u32 = 0x0204;
 
 pub const LLKHF_EXTENDED: u32 = 0x01;
 pub const LLKHF_INJECTED: u32 = 0x10;
@@ -256,6 +269,8 @@ unsafe extern "system" {
     pub fn GetForegroundWindow() -> HWND;
     pub fn GetAncestor(hwnd: HWND, gaFlags: u32) -> HWND;
     pub fn IsWindow(hWnd: HWND) -> BOOL;
+    pub fn GetWindowTextW(hWnd: HWND, lpString: *mut u16, nMaxCount: i32) -> i32;
+    pub fn GetClassNameW(hWnd: HWND, lpClassName: *mut u16, nMaxCount: i32) -> i32;
     pub fn GetGUIThreadInfo(idThread: u32, pgui: *mut GUITHREADINFO) -> BOOL;
     pub fn GetWindowThreadProcessId(hWnd: HWND, lpdwProcessId: *mut u32) -> u32;
     pub fn ClientToScreen(hWnd: HWND, lpPoint: *mut POINT) -> BOOL;
@@ -330,6 +345,38 @@ pub fn get_active_window_handle() -> usize {
             fg as usize
         } else {
             root as usize
+        }
+    }
+}
+
+/// Get window title of the given HWND
+pub fn get_window_title(hwnd: usize) -> String {
+    if hwnd == 0 {
+        return String::new();
+    }
+    unsafe {
+        let mut buf = [0u16; 256];
+        let len = GetWindowTextW(hwnd as HWND, buf.as_mut_ptr(), buf.len() as i32);
+        if len > 0 {
+            String::from_utf16_lossy(&buf[..len as usize])
+        } else {
+            String::new()
+        }
+    }
+}
+
+/// Get window class name of the given HWND
+pub fn get_window_class(hwnd: usize) -> String {
+    if hwnd == 0 {
+        return String::new();
+    }
+    unsafe {
+        let mut buf = [0u16; 128];
+        let len = GetClassNameW(hwnd as HWND, buf.as_mut_ptr(), buf.len() as i32);
+        if len > 0 {
+            String::from_utf16_lossy(&buf[..len as usize])
+        } else {
+            String::new()
         }
     }
 }

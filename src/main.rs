@@ -63,6 +63,7 @@ fn run_windows(config: AppConfig) {
         let mut engine = ENGINE.lock().unwrap();
         engine.sound_enabled = config.sound_enabled;
         engine.typing_style = config.typing_style;
+        engine.smart_coding_mode = config.smart_coding_mode;
     }
     {
         let mut wsm = hook::WINDOW_STATE_MGR.lock().unwrap();
@@ -138,6 +139,7 @@ fn print_welcome_banner(config: &AppConfig) {
     println!("  \x1b[1mAudio Feedback:\x1b[0m  {}", if config.sound_enabled { "\x1b[1;32mEnabled (Beep)\x1b[0m" } else { "\x1b[90mDisabled\x1b[0m" });
     println!("  \x1b[1mOn-Screen Badge:\x1b[0m {}", if config.osd_badge { "\x1b[1;32mEnabled (Floating BN/EN near cursor)\x1b[0m" } else { "\x1b[90mDisabled\x1b[0m" });
     println!("  \x1b[1mPer-App Language:\x1b[0m {}", if config.per_window_mode { "\x1b[1;32mEnabled (Auto-remembers per app)\x1b[0m" } else { "\x1b[90mDisabled (Global)\x1b[0m" });
+    println!("  \x1b[1mSmart Coding IDE:\x1b[0m {}", if config.smart_coding_mode { "\x1b[1;32mEnabled (Auto-English when editing code)\x1b[0m" } else { "\x1b[90mDisabled\x1b[0m" });
     println!();
     println!("  \x1b[1mBangla Quick Typing Cheat-Sheet:\x1b[0m");
     println!("    • \x1b[36mস্বরবর্ণ:\x1b[0m Shift+F=অ, g+f=আ, g+d=ই, g+D=ঈ, g+s=উ, g+S=ঊ, g+a=ঋ, g+c=এ, g+C=ঐ, g+x=ও, g+X=ঔ");

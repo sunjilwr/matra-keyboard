@@ -28,6 +28,7 @@ pub struct AppConfig {
     pub start_hidden: bool,
     pub per_window_mode: bool,
     pub osd_badge: bool,
+    pub smart_coding_mode: bool,
 }
 
 impl Default for AppConfig {
@@ -39,6 +40,7 @@ impl Default for AppConfig {
             start_hidden: true,
             per_window_mode: true, // Independent keyboard state per application window
             osd_badge: true, // Sleek floating "বাংলা" / "EN" badge near cursor
+            smart_coding_mode: true, // Auto-switch to English when editing code in IDEs (Antigravity, VS Code, etc.)
         }
     }
 }
@@ -101,6 +103,9 @@ impl AppConfig {
                         "osd" | "osd_badge" | "badge" | "indicator" => {
                             config.osd_badge = matches!(v.to_lowercase().as_str(), "true" | "1" | "yes" | "on");
                         }
+                        "smart_coding" | "smart_coding_mode" | "code_mode" => {
+                            config.smart_coding_mode = matches!(v.to_lowercase().as_str(), "true" | "1" | "yes" | "on");
+                        }
                         _ => {}
                     }
                 }
@@ -157,13 +162,21 @@ per_window_mode = {}
 
 # Sleek on-screen floating "BN" / "EN" badge near typing cursor (true / false)
 osd_badge = {}
+
+# Smart Coding Mode for IDEs like Antigravity, VS Code, Cursor, Android Studio (true / false)
+#   true  = Keeps digits (0-9) and code symbols in English inside IDEs, and automatically
+#           switches back to English when clicking into the code editor, switching file tabs,
+#           or pressing Enter after sending an AI chat message. (Recommended)
+#   false = Manual language switching only.
+smart_coding_mode = {}
 "#,
             shortcut_str,
             if self.sound_enabled { "true" } else { "false" },
             typing_style_str,
             if self.start_hidden { "true" } else { "false" },
             if self.per_window_mode { "true" } else { "false" },
-            if self.osd_badge { "true" } else { "false" }
+            if self.osd_badge { "true" } else { "false" },
+            if self.smart_coding_mode { "true" } else { "false" }
         );
 
         let _ = fs::write(Self::get_config_path(), content);

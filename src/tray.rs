@@ -12,6 +12,7 @@ pub const ID_TRAY_TOGGLE: usize = 1001;
 pub const ID_TRAY_CONFIG: usize = 1002;
 pub const ID_TRAY_README: usize = 1003;
 pub const ID_TRAY_EXIT: usize = 1004;
+pub const ID_TRAY_SMART_CODING: usize = 1005;
 
 static TRAY_HWND: AtomicIsize = AtomicIsize::new(0);
 
@@ -35,24 +36,14 @@ pub unsafe extern "system" fn tray_window_proc(
             match event {
                 // Left click or double click: toggle mode!
                 0x0202 | 0x0203 => { // WM_LBUTTONUP = 0x0202, WM_LBUTTONDBLCLK = 0x0203
-                    let mut engine = ENGINE.lock().unwrap();
-                    let new_mode = engine.toggle_mode();
-                    print_mode_banner(new_mode);
-                    update_tray_tooltip(hwnd, new_mode);
-
-                    let active = get_active_window_handle();
-                    if active != 0 {
-                        let mut wsm = crate::hook::WINDOW_STATE_MGR.lock().unwrap();
-                        wsm.set_mode_for_window(active, new_mode);
-                    }
-
-                    let show_osd = {
-                        let cfg_guard = crate::hook::CONFIG.lock().unwrap();
-                        cfg_guard.as_ref().map_or(true, |c| c.osd_badge)
+                    let new_mode = {
+                        let mut engine = ENGINE.lock().unwrap();
+                        engine.toggle_mode()
                     };
-                    if show_osd {
-                        crate::osd::show_mode_badge(new_mode);
-                    }
+                    print_mode_banner(new_mode);
+                    let active = get_active_window_handle();
+                    crate::hook::record_manual_bangla_zone(active, new_mode);
+                    crate::hook::apply_mode_change_side_effects(active, new_mode);
                 }
                 // Right click or Context Menu: show popup menu
                 0x0205 | 0x007B => { // WM_RBUTTONUP = 0x0205, WM_CONTEXTMENU = 0x007B
@@ -68,24 +59,28 @@ pub unsafe extern "system" fn tray_window_proc(
             let cmd_id = (w_param & 0xFFFF) as usize;
             match cmd_id {
                 ID_TRAY_TOGGLE => {
-                    let mut engine = ENGINE.lock().unwrap();
-                    let new_mode = engine.toggle_mode();
-                    print_mode_banner(new_mode);
-                    update_tray_tooltip(hwnd, new_mode);
-
-                    let active = get_active_window_handle();
-                    if active != 0 {
-                        let mut wsm = crate::hook::WINDOW_STATE_MGR.lock().unwrap();
-                        wsm.set_mode_for_window(active, new_mode);
-                    }
-
-                    let show_osd = {
-                        let cfg_guard = crate::hook::CONFIG.lock().unwrap();
-                        cfg_guard.as_ref().map_or(true, |c| c.osd_badge)
+                    let new_mode = {
+                        let mut engine = ENGINE.lock().unwrap();
+                        engine.toggle_mode()
                     };
-                    if show_osd {
-                        crate::osd::show_mode_badge(new_mode);
-                    }
+                    print_mode_banner(new_mode);
+                    let active = get_active_window_handle();
+                    crate::hook::record_manual_bangla_zone(active, new_mode);
+                    crate::hook::apply_mode_change_side_effects(active, new_mode);
+                }
+                ID_TRAY_SMART_CODING => {
+                    let new_val = {
+                        let mut cfg_guard = crate::hook::CONFIG.lock().unwrap();
+                        if let Some(cfg) = cfg_guard.as_mut() {
+                            cfg.smart_coding_mode = !cfg.smart_coding_mode;
+                            cfg.save_to_file();
+                            cfg.smart_coding_mode
+                        } else {
+                            true
+                        }
+                    };
+                    let mut engine = ENGINE.lock().unwrap();
+                    engine.smart_coding_mode = new_val;
                 }
                 ID_TRAY_CONFIG => {
                     open_file_in_default_app("config.ini");
@@ -210,9 +205,9 @@ unsafe fn show_tray_menu(hwnd: HWND) {
         return;
     }
 
-    let mode = {
+    let (mode, smart_coding) = {
         let engine = ENGINE.lock().unwrap();
-        engine.mode
+        (engine.mode, engine.smart_coding_mode)
     };
 
     let toggle_label = match mode {
@@ -220,13 +215,21 @@ unsafe fn show_tray_menu(hwnd: HWND) {
         KeyboardMode::Bangla => "Switch to English (EN)   Ctrl+\\",
     };
 
+    let smart_coding_label = if smart_coding {
+        "⚡ Smart Coding Mode: ON (Auto-EN in IDE)"
+    } else {
+        "⚡ Smart Coding Mode: OFF"
+    };
+
     let w_toggle = to_wide_string(toggle_label);
+    let w_smart = to_wide_string(smart_coding_label);
     let w_config = to_wide_string("⚙ Settings (config.ini)");
     let w_about = to_wide_string("📖 Keyboard Cheat-Sheet (README)");
     let w_exit = to_wide_string("❌ Exit Matra");
 
     unsafe {
         AppendMenuW(h_menu, 0x0000, ID_TRAY_TOGGLE, w_toggle.as_ptr());
+        AppendMenuW(h_menu, 0x0000, ID_TRAY_SMART_CODING, w_smart.as_ptr());
         AppendMenuW(h_menu, 0x0800, 0, std::ptr::null()); // MF_SEPARATOR
         AppendMenuW(h_menu, 0x0000, ID_TRAY_CONFIG, w_config.as_ptr());
         AppendMenuW(h_menu, 0x0000, ID_TRAY_README, w_about.as_ptr());

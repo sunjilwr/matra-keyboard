@@ -205,7 +205,7 @@ mod tests {
 
         // 6. e (ড -> forms conjunct 'ন্ড')
         assert!(engine.handle_key_down(0x45, false, false, false));
-        assert_eq!(engine.last_typed, matra::engine::LastTyped::ConsonantCluster);
+        assert_eq!(engine.last_typed, matra::engine::LastTyped::ConjunctNeedingZwjBeforeUKar);
 
         // 7. Shift + V (ল)
         assert!(engine.handle_key_down(0x56, true, false, false));
@@ -293,5 +293,136 @@ mod tests {
         assert!(!engine.handle_key_down_with_modifiers(0x5B, false, false, false, true));
         // 2. 'V' keydown (0x56) with is_win=true MUST pass through untouched (returns false)
         assert!(!engine.handle_key_down_with_modifiers(0x56, false, false, false, true));
+    }
+
+    #[test]
+    fn test_smart_coding_mode_detection_and_auto_english() {
+        use matra::engine::{classify_window_context, WindowContext};
+        use matra::hook::WindowStateManager;
+
+        // 1. Detect Antigravity IDE and pubspec.yaml from screenshot
+        assert_eq!(
+            classify_window_context(
+                "plant_identify - Antigravity IDE - pubspec.yaml●",
+                "Chrome_WidgetWin_1"
+            ),
+            WindowContext::CodingIde
+        );
+        assert_eq!(
+            classify_window_context("main.rs - Visual Studio Code", "Chrome_WidgetWin_1"),
+            WindowContext::CodingIde
+        );
+        assert_eq!(
+            classify_window_context("Windows PowerShell", "CASCADIA_HOSTING_WINDOW_CLASS"),
+            WindowContext::Terminal
+        );
+        assert_eq!(
+            classify_window_context("Google Chrome", "Chrome_WidgetWin_1"),
+            WindowContext::Normal
+        );
+
+        // 2. Test Smart Coding Mode inside Antigravity IDE
+        let mut engine = Engine::new();
+        engine.mode = KeyboardMode::Bangla;
+        engine.smart_coding_mode = true;
+        engine.window_context = WindowContext::CodingIde;
+        engine.sound_enabled = false;
+
+        // Scenario A: User forgot Bangla was ON and edits `version: 1.0.9+1` -> presses '3' (0x33)
+        // Must pass through as English '3' (returns false) AND auto-switch engine to English!
+        assert!(!engine.handle_key_down(0x33, false, false, false));
+        assert_eq!(engine.mode, KeyboardMode::English);
+
+        // Scenario B: User turns on Bangla in AI Chat, types Bangla, presses Enter/Shift+Enter/Ctrl+V
+        engine.set_mode(KeyboardMode::Bangla);
+        assert!(engine.handle_key_down(0x4A, false, false, false)); // 'j' -> ক
+        assert_eq!(engine.bangla_chars_typed, 1);
+        // Enter and Shift+Enter inside AI chat keep Bangla mode ON while user is still in chat!
+        assert!(!engine.handle_key_down(0x0D, true, false, false));
+        assert_eq!(engine.mode, KeyboardMode::Bangla);
+        assert!(!engine.handle_key_down(0x0D, false, false, false));
+        assert_eq!(engine.mode, KeyboardMode::Bangla);
+        // Ctrl + V (paste into AI chat) keeps Bangla mode ON!
+        assert!(!engine.handle_key_down(0x56, false, false, true));
+        assert_eq!(engine.mode, KeyboardMode::Bangla);
+        // Escape or code syntax (e.g. ';' = 0xBA) auto-switches to English!
+        assert!(!engine.handle_key_down(0xBA, false, false, false));
+        assert_eq!(engine.mode, KeyboardMode::English);
+
+        // Two-way Chat Zone geometry test:
+        // Clicking inside AI chat box stays within zone; clicking Code Editor is outside zone
+        assert!(matra::hook::is_point_in_chat_zone(1600, 920, 1550, 900));
+        assert!(!matra::hook::is_point_in_chat_zone(650, 420, 1550, 900));
+
+        // Scenario C: Switching file tabs in IDE auto-switches to English, while dirty marker '●' does not!
+        let mut wsm = WindowStateManager::new(true);
+        assert_eq!(
+            wsm.sync_active_window_with_context(
+                500,
+                "plant_identify - Antigravity IDE - pubspec.yaml",
+                WindowContext::CodingIde,
+                true
+            ),
+            Some(KeyboardMode::English)
+        );
+        wsm.set_mode_for_window(500, KeyboardMode::Bangla);
+        // Dirty marker '●' added while typing -> should NOT reset to English
+        assert_eq!(
+            wsm.sync_active_window_with_context(
+                500,
+                "plant_identify - Antigravity IDE - pubspec.yaml●",
+                WindowContext::CodingIde,
+                true
+            ),
+            None
+        );
+        // User switches tab to ad_helper.dart -> automatically switches to English!
+        assert_eq!(
+            wsm.sync_active_window_with_context(
+                500,
+                "plant_identify - Antigravity IDE - ad_helper.dart",
+                WindowContext::CodingIde,
+                true
+            ),
+            Some(KeyboardMode::English)
+        );
+    }
+
+    #[test]
+    fn test_student_conjunct_ukar_ligature_fix() {
+        let mut engine = Engine::new();
+        engine.mode = KeyboardMode::Bangla;
+        engine.sound_enabled = false;
+
+        // Sequence for "স্টুডেন্ট":
+        // 1. n (স)
+        assert!(engine.handle_key_down(0x4E, false, false, false));
+        assert_eq!(engine.last_typed, matra::engine::LastTyped::Consonant("স"));
+        // 2. g (link key ্)
+        assert!(engine.handle_key_down(0x47, false, false, false));
+        assert!(engine.link_active);
+        // 3. t (ট) -> forms 'স্ট' (marked as ConjunctNeedingZwjBeforeUKar)
+        assert!(engine.handle_key_down(0x54, false, false, false));
+        assert_eq!(
+            engine.last_typed,
+            matra::engine::LastTyped::ConjunctNeedingZwjBeforeUKar
+        );
+        // 4. s (ু) -> outputs ZWJ (\u{200D}) + 'ু' so Windows Nirmala UI renders joined 'স্টু' instead of 'স্‌টু'!
+        assert!(engine.handle_key_down(0x53, false, false, false));
+        assert_eq!(engine.last_typed, matra::engine::LastTyped::KarWithZwj);
+
+        // 5. Classic pre-base kar + conjunct reordering: 'c' (ে) + 'n' (স) + 'g' (্) + 't' (ট) -> 'স্টে'
+        assert!(engine.handle_key_down(0x43, false, false, false)); // c (ে)
+        assert_eq!(engine.pending_kar, Some("ে"));
+        assert!(engine.handle_key_down(0x4E, false, false, false)); // n (স) -> 'সে'
+        assert!(engine.handle_key_down(0x47, false, false, false)); // g (্)
+        assert!(engine.handle_key_down(0x54, false, false, false)); // t (ট) -> reorders 'সে' + '্ট' into 'স্টে'!
+        assert_eq!(
+            engine.last_typed,
+            matra::engine::LastTyped::ConsonantWithPendingKar {
+                cons: "ট",
+                kar: "ে"
+            }
+        );
     }
 }

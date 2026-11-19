@@ -33,12 +33,117 @@ pub enum KeyboardMode {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum WindowContext {
+    /// Standard applications (Browser, Word, Messenger, Notepad, etc.)
+    Normal,
+    /// Code editors & IDEs (Antigravity IDE, VS Code, Cursor, Android Studio, etc.)
+    CodingIde,
+    /// Command-line terminals (Windows Terminal, PowerShell, CMD, Git Bash, etc.)
+    Terminal,
+}
+
+/// Normalize a window title by stripping dirty file markers ('●', '*', '•') and outer whitespace
+/// so that modifying an unsaved file doesn't trigger a false tab-switch event.
+pub fn normalize_window_title(title: &str) -> String {
+    title
+        .chars()
+        .filter(|&c| c != '●' && c != '•' && c != '*')
+        .collect::<String>()
+        .trim()
+        .to_string()
+}
+
+/// Classify a window as Normal, CodingIde, or Terminal based on its title and Win32 class name.
+pub fn classify_window_context(title: &str, class_name: &str) -> WindowContext {
+    let t = title.to_lowercase();
+    let c = class_name.to_lowercase();
+
+    // 1. Check for Terminal emulators
+    if c.contains("cascadia_hosting_window_class")
+        || c == "consolewindowclass"
+        || c == "mintty"
+        || c.contains("wezterm")
+        || c.contains("alacritty")
+        || c == "putty"
+        || t.contains("windows powershell")
+        || t.contains("command prompt")
+        || t.contains("cmd.exe")
+        || t.contains("pwsh.exe")
+        || t.contains("mingw64")
+        || t.contains("git bash")
+    {
+        return WindowContext::Terminal;
+    }
+
+    // 2. Check for Coding IDEs and Code Editors
+    if c.contains("sunawtframe") // JetBrains IDEs (Android Studio, IntelliJ, PyCharm, WebStorm, etc.)
+        || c == "notepad++"
+        || c == "px_window_class" // Sublime Text
+        || t.contains("antigravity")
+        || t.contains("visual studio code")
+        || t.contains("vs code")
+        || t.contains("vscodium")
+        || t.contains(" - cursor")
+        || t.starts_with("cursor - ")
+        || t.contains("windsurf")
+        || t.contains("android studio")
+        || t.contains("intellij idea")
+        || t.contains("pycharm")
+        || t.contains("webstorm")
+        || t.contains("phpstorm")
+        || t.contains("goland")
+        || t.contains("clion")
+        || t.contains("rustrover")
+        || t.contains("microsoft visual studio")
+        || t.contains("sublime text")
+        || t.contains("notepad++")
+        || t.contains(" - zed")
+        || t.contains("neovim")
+        || has_code_file_in_title(&t)
+    {
+        return WindowContext::CodingIde;
+    }
+
+    WindowContext::Normal
+}
+
+fn has_code_file_in_title(lower_title: &str) -> bool {
+    const CODE_EXTS: &[&str] = &[
+        ".dart", ".yaml", ".yml", ".json", ".toml", ".rs", ".py", ".js", ".ts", ".tsx", ".jsx",
+        ".java", ".kt", ".kts", ".gradle", ".xml", ".html", ".css", ".scss", ".c", ".cpp", ".h",
+        ".hpp", ".cs", ".go", ".php", ".rb", ".sql", ".sh", ".bat", ".ps1", ".vue", ".svelte",
+        ".astro", ".lock", ".ini", ".iss",
+    ];
+    for ext in CODE_EXTS {
+        if let Some(idx) = lower_title.find(ext) {
+            let after = &lower_title[idx + ext.len()..];
+            if after.is_empty()
+                || after.starts_with(' ')
+                || after.starts_with('-')
+                || after.starts_with('—')
+                || after.starts_with('•')
+                || after.starts_with('●')
+                || after.starts_with('*')
+                || after.starts_with(')')
+                || after.starts_with(']')
+            {
+                return true;
+            }
+        }
+    }
+    false
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LastTyped {
     None,
     /// Single consonant (e.g. "ম", "ক", "ফ")
     Consonant(&'static str),
-    /// Consonant cluster formed by fola (ro-fola, jo-fola) or conjunct (e.g. "ফ্র", "ন্ড", "ক্র")
+    /// Consonant cluster formed by fola (ro-fola, jo-fola) or conjunct (e.g. "ফ্র", "ক্র")
     ConsonantCluster,
+    /// A conjunct ending in 'ট' or 'ড' (e.g. স্ট, ন্ট, ল্ট, প্ট, ন্ড, ল্ড) where Windows'
+    /// Nirmala UI font breaks the conjunct ligature if ু/ূ is attached without ZWJ (\u{200D}).
+    ConjunctNeedingZwjBeforeUKar,
     /// A consonant where a pre-base Kar was attached via Classic visual typing (e.g. "ফে" from "c" + "Shift+R")
     ConsonantWithPendingKar {
         cons: &'static str,
@@ -46,6 +151,8 @@ pub enum LastTyped {
     },
     /// Vowel sign / Kar (e.g. ি, ী, ু, ূ, ৃ, ে, ৈ, ো, ৌ, া)
     Kar,
+    /// A ু/ূ Kar that was preceded by an automatic ZWJ (\u{200D}) to preserve conjunct shaping
+    KarWithZwj,
     Other,
 }
 
@@ -55,6 +162,7 @@ impl LastTyped {
             self,
             LastTyped::Consonant(_)
                 | LastTyped::ConsonantCluster
+                | LastTyped::ConjunctNeedingZwjBeforeUKar
                 | LastTyped::ConsonantWithPendingKar { .. }
         )
     }
@@ -67,6 +175,9 @@ pub struct Engine {
     pub last_typed: LastTyped,
     pub sound_enabled: bool,
     pub typing_style: TypingStyle,
+    pub smart_coding_mode: bool,
+    pub window_context: WindowContext,
+    pub bangla_chars_typed: usize,
 }
 
 impl Engine {
@@ -78,12 +189,16 @@ impl Engine {
             last_typed: LastTyped::None,
             sound_enabled: false, // Default off as user requested (OSD badge used instead)
             typing_style: TypingStyle::Classic,
+            smart_coding_mode: true,
+            window_context: WindowContext::Normal,
+            bangla_chars_typed: 0,
         }
     }
 
     /// Toggle between English and Bangla modes
     pub fn toggle_mode(&mut self) -> KeyboardMode {
         self.reset_state();
+        self.bangla_chars_typed = 0;
 
         self.mode = match self.mode {
             KeyboardMode::English => {
@@ -116,6 +231,7 @@ impl Engine {
     pub fn set_mode(&mut self, mode: KeyboardMode) {
         if self.mode != mode {
             self.reset_state();
+            self.bangla_chars_typed = 0;
             self.mode = mode;
             if mode == KeyboardMode::Bangla {
                 turn_caps_lock_off();
@@ -165,6 +281,18 @@ impl Engine {
             } else {
                 self.flush_pending_states();
                 self.last_typed = LastTyped::Other;
+
+                // In Smart Coding Mode: IDE navigation/file shortcuts (Ctrl+S, Ctrl+P, Ctrl+F, Ctrl+G,
+                // Ctrl+Tab, Ctrl+/, Ctrl+B, Ctrl+J, Ctrl+~) auto-switch back to English,
+                // while clipboard/edit shortcuts (Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+Z, Ctrl+Y, Ctrl+A) keep Bangla.
+                if self.smart_coding_mode
+                    && self.window_context != WindowContext::Normal
+                    && is_ctrl
+                    && !is_alt
+                    && is_ide_navigation_shortcut(vk)
+                {
+                    self.set_mode(KeyboardMode::English);
+                }
             }
             return false;
         }
@@ -179,8 +307,45 @@ impl Engine {
                 self.pending_kar = None;
                 return true;
             }
+            if self.last_typed == LastTyped::KarWithZwj {
+                // Remove the automatic ZWJ (\u{200D}) along with the u-kar
+                send_backspaces(1);
+            }
             self.last_typed = LastTyped::None;
             return false; // Normal backspace passes through
+        }
+
+        // Smart Coding Mode inside Coding IDEs & Terminals:
+        let is_coding_ctx = self.smart_coding_mode && self.window_context != WindowContext::Normal;
+        if is_coding_ctx {
+            // 1. Escape / PageUp (0x21) / PageDown (0x22): editor navigation -> auto-switch to English!
+            if vk == VK_ESCAPE as u32 || vk == 0x21 || vk == 0x22 {
+                self.flush_pending_states();
+                self.set_mode(KeyboardMode::English);
+                return false;
+            }
+
+            // 2. Numbers (0-9 and Numpad 0-9): always output English digits in Coding IDEs
+            //    (e.g. version: 1.0.9+13, ports, array indices never become ০-৯!)
+            let is_top_row_digit = !is_shift && (0x30..=0x39).contains(&vk);
+            let is_numpad_digit = (VK_NUMPAD0 as u32..=VK_NUMPAD9 as u32).contains(&vk);
+            if is_top_row_digit || is_numpad_digit {
+                self.flush_pending_states();
+                self.last_typed = LastTyped::Other;
+                // If user hasn't typed Bangla prose yet (directly editing a number in code), auto-switch to English!
+                if self.bangla_chars_typed == 0 {
+                    self.set_mode(KeyboardMode::English);
+                }
+                return false;
+            }
+
+            // 3. Code syntax & operators ({ } [ ] ; = + < > \ | ` ~ /):
+            //    Output English symbol directly and auto-switch to English for coding!
+            if is_code_syntax_key(vk, is_shift) {
+                self.flush_pending_states();
+                self.set_mode(KeyboardMode::English);
+                return false;
+            }
         }
 
         // Non-character keys (Enter, Tab, Escape, Arrow keys, etc.)
@@ -272,8 +437,7 @@ impl Engine {
                 return true;
             }
 
-            // Otherwise, this is a conjunct (e.g. ক + g + ক = ক্ক, ন + g + ড = ন্ড)
-            send_unicode_string("\u{09CD}");
+            // Otherwise, this is a conjunct (e.g. ক + g + ক = ক্ক, স + g + ট = স্ট)
             self.link_active = false;
             was_conjunct_link = true;
         }
@@ -284,7 +448,7 @@ impl Engine {
         // and last_typed was NOT a consonant base (i.e. visual order at start of syllable):
         // ====================================================================
         let is_after_consonant = self.last_typed.is_consonant_base();
-        if self.typing_style == TypingStyle::Classic && !is_after_consonant {
+        if !was_conjunct_link && self.typing_style == TypingStyle::Classic && !is_after_consonant {
             if let Some(kar) = get_pre_base_kar(vk, is_shift) {
                 self.pending_kar = Some(kar);
                 return true; // buffer it, waiting for the consonant
@@ -296,9 +460,45 @@ impl Engine {
         // ====================================================================
         match map_bangla_key(vk, shift_state) {
             KeyOutput::Text(text) => {
+                self.bangla_chars_typed = self.bangla_chars_typed.saturating_add(1);
                 let is_cons = is_bengali_consonant(text);
 
-                // If a pre-base kar was waiting from Classic visual typing:
+                // Case A: Forming a conjunct via Link Key 'g' (C1 + g + C2)
+                if was_conjunct_link {
+                    if is_cons {
+                        // If C1 had a Classic pre-base kar (e.g. user typed 'ে' + 'স' -> 'সে', then 'g' + 'ট'),
+                        // reorder it so the kar moves after the entire conjunct ('স্টে')!
+                        if let LastTyped::ConsonantWithPendingKar { cons: _, kar } = self.last_typed {
+                            send_backspaces(1); // Erase 'ে' after C1
+                            send_unicode_string("\u{09CD}"); // Send Hasanta '্'
+                            send_unicode_string(text); // Send C2 (e.g. 'ট')
+                            send_unicode_string(kar); // Re-send 'ে' after C2 -> 'স্টে'
+                            self.last_typed = LastTyped::ConsonantWithPendingKar { cons: text, kar };
+                            return true;
+                        }
+
+                        // Standard conjunct: send Hasanta '্' followed by C2
+                        send_unicode_string("\u{09CD}");
+                        send_unicode_string(text);
+
+                        // Check if this conjunct (e.g. স্ট, ন্ট, ল্ট, প্ট, ন্ড, ল্ড) needs ZWJ before ু/ূ in Windows Nirmala UI
+                        let needs_zwj = match self.last_typed {
+                            LastTyped::Consonant(c1) => needs_zwj_before_ukar(c1, text),
+                            _ => false,
+                        };
+                        self.last_typed = if needs_zwj {
+                            LastTyped::ConjunctNeedingZwjBeforeUKar
+                        } else {
+                            LastTyped::ConsonantCluster
+                        };
+                        return true;
+                    } else {
+                        // Not a consonant after 'g': flush the Hasanta '্' first
+                        send_unicode_string("\u{09CD}");
+                    }
+                }
+
+                // Case B: If a pre-base kar was waiting from Classic visual typing:
                 if let Some(kar) = self.pending_kar.take() {
                     if is_cons {
                         // User typed: ি + ক -> Output: ক + ি (কি)
@@ -312,11 +512,21 @@ impl Engine {
                     }
                 }
 
+                // Case C: Windows Nirmala UI conjunct + ু/ূ ligature preservation fix!
+                // Without ZWJ (\u{200D}), Nirmala UI breaks 'স্ট + ু' into 'স্‌টু' (as in 'স্টুডেন্ট').
+                // Sending ZWJ before ু/ূ keeps 'স্ট' joined and places ু cleanly below it ('স্টু').
+                if self.last_typed == LastTyped::ConjunctNeedingZwjBeforeUKar
+                    && (text == "\u{09C1}" || text == "\u{09C2}")
+                {
+                    send_unicode_string("\u{200D}");
+                    send_unicode_string(text);
+                    self.last_typed = LastTyped::KarWithZwj;
+                    return true;
+                }
+
                 send_unicode_string(text);
 
-                if was_conjunct_link && is_cons {
-                    self.last_typed = LastTyped::ConsonantCluster;
-                } else if is_cons {
+                if is_cons {
                     self.last_typed = LastTyped::Consonant(text);
                 } else if is_bengali_kar(text) {
                     self.last_typed = LastTyped::Kar;
@@ -326,6 +536,7 @@ impl Engine {
                 true
             }
             KeyOutput::LinkKey => {
+                self.bangla_chars_typed = self.bangla_chars_typed.saturating_add(1);
                 // If a pre-base kar was waiting, flush it
                 if let Some(kar) = self.pending_kar.take() {
                     send_unicode_string(kar);
@@ -363,4 +574,41 @@ fn is_modifier_key(vk: u32) -> bool {
         | 0x14 // Caps Lock
         | 0x5B | 0x5C // Win keys
     )
+}
+
+/// Checks if a Ctrl+<key> shortcut is an IDE file/code navigation action
+/// (excludes clipboard/text-editing shortcuts like Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+Z, Ctrl+Y, Ctrl+A)
+fn is_ide_navigation_shortcut(vk: u32) -> bool {
+    matches!(
+        vk,
+        0x53 // Ctrl+S (Save file)
+        | 0x50 // Ctrl+P (Quick Open file)
+        | 0x46 // Ctrl+F (Find in code)
+        | 0x47 // Ctrl+G (Go to line)
+        | 0x42 // Ctrl+B (Toggle sidebar)
+        | 0x4A // Ctrl+J (Toggle panel/terminal)
+        | 0x09 // Ctrl+Tab (Switch editor tab)
+    ) || vk == VK_OEM_2 as u32 // Ctrl+/ (Toggle code comment)
+      || vk == VK_OEM_3 as u32 // Ctrl+` (Toggle integrated terminal)
+}
+
+/// Checks if a conjunct (C1 + ্ + C2) requires ZWJ (\u{200D}) before ু/ূ in Windows' Nirmala UI font
+/// so that Nirmala UI doesn't break the conjunct into a visible hasanta (e.g. স্‌টু -> স্টু).
+fn needs_zwj_before_ukar(c1: &str, c2: &str) -> bool {
+    (matches!(c1, "স" | "ন" | "ল" | "প") && c2 == "ট")
+        || (matches!(c1, "ন" | "ল") && c2 == "ড")
+}
+
+/// Checks if a key is a code syntax delimiter or operator that indicates code editing inside an IDE
+fn is_code_syntax_key(vk: u32, is_shift: bool) -> bool {
+    vk == VK_OEM_4 as u32 // [ or {
+        || vk == VK_OEM_6 as u32 // ] or }
+        || vk == VK_OEM_PLUS as u32 // = or +
+        || vk == VK_ADD as u32 // Numpad +
+        || vk == VK_OEM_3 as u32 // ` or ~
+        || vk == VK_OEM_5 as u32 // \ or |
+        || (vk == VK_OEM_1 as u32 && !is_shift) // ;
+        || (vk == VK_OEM_2 as u32 && !is_shift) // /
+        || (vk == VK_OEM_COMMA as u32 && is_shift) // <
+        || (vk == VK_OEM_PERIOD as u32 && is_shift) // >
 }
