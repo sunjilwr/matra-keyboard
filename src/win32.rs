@@ -268,6 +268,8 @@ unsafe extern "system" {
     pub fn LoadIconW(hInstance: HINSTANCE, lpIconName: *const u16) -> *mut std::ffi::c_void;
     pub fn GetForegroundWindow() -> HWND;
     pub fn GetAncestor(hwnd: HWND, gaFlags: u32) -> HWND;
+    pub fn WindowFromPoint(Point: POINT) -> HWND;
+    pub fn GetWindowRect(hWnd: HWND, lpRect: *mut RECT) -> BOOL;
     pub fn IsWindow(hWnd: HWND) -> BOOL;
     pub fn GetWindowTextW(hWnd: HWND, lpString: *mut u16, nMaxCount: i32) -> i32;
     pub fn GetClassNameW(hWnd: HWND, lpClassName: *mut u16, nMaxCount: i32) -> i32;
@@ -284,6 +286,7 @@ unsafe extern "system" {
     pub fn DrawTextW(hdc: *mut std::ffi::c_void, lpchText: *const u16, cchText: i32, lprc: *mut RECT, format: u32) -> i32;
     pub fn SetWindowRgn(hWnd: HWND, hRgn: *mut std::ffi::c_void, bRedraw: BOOL) -> i32;
     pub fn GetSystemMetrics(nIndex: i32) -> i32;
+    pub fn PostMessageW(hWnd: HWND, Msg: u32, wParam: WPARAM, lParam: LPARAM) -> BOOL;
 }
 
 #[link(name = "gdi32")]
@@ -313,6 +316,7 @@ unsafe extern "system" {
 }
 
 pub const WS_EX_TOPMOST: u32 = 0x00000008;
+pub const WS_EX_TRANSPARENT: u32 = 0x00000020;
 pub const WS_EX_TOOLWINDOW: u32 = 0x00000080;
 pub const WS_EX_NOACTIVATE: u32 = 0x08000000;
 pub const WS_POPUP: u32 = 0x80000000;
@@ -320,8 +324,11 @@ pub const WS_POPUP: u32 = 0x80000000;
 pub const HWND_TOPMOST: HWND = -1 as isize as HWND;
 pub const SWP_NOSIZE: u32 = 0x0001;
 pub const SWP_NOMOVE: u32 = 0x0002;
+pub const SWP_NOZORDER: u32 = 0x0004;
 pub const SWP_NOACTIVATE: u32 = 0x0010;
 pub const SWP_SHOWWINDOW: u32 = 0x0040;
+pub const SWP_HIDEWINDOW: u32 = 0x0080;
+pub const SWP_NOOWNERZORDER: u32 = 0x0200;
 
 pub const DT_CENTER: u32 = 0x00000001;
 pub const DT_VCENTER: u32 = 0x00000004;
@@ -345,6 +352,37 @@ pub fn get_active_window_handle() -> usize {
             fg as usize
         } else {
             root as usize
+        }
+    }
+}
+
+/// Get top-level window handle directly under the given screen coordinates
+pub fn get_window_at_point(pt: POINT) -> usize {
+    unsafe {
+        let hwnd = WindowFromPoint(pt);
+        if hwnd.is_null() {
+            return 0;
+        }
+        let root = GetAncestor(hwnd, GA_ROOT);
+        if root.is_null() {
+            hwnd as usize
+        } else {
+            root as usize
+        }
+    }
+}
+
+/// Get bounding rectangle of a window in screen coordinates
+pub fn get_window_rect(hwnd: usize) -> Option<RECT> {
+    if hwnd == 0 {
+        return None;
+    }
+    unsafe {
+        let mut rect = RECT::default();
+        if GetWindowRect(hwnd as HWND, &mut rect) != 0 {
+            Some(rect)
+        } else {
+            None
         }
     }
 }

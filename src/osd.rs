@@ -39,11 +39,7 @@ pub unsafe extern "system" fn osd_window_proc(
             let (x, y) = unsafe { compute_badge_position() };
 
             unsafe {
-                // Ensure rounded region (smooth pill shape)
-                let rgn = CreateRoundRectRgn(0, 0, BADGE_WIDTH, BADGE_HEIGHT, 12, 12);
-                SetWindowRgn(hwnd, rgn, 1);
-
-                // Position and show window without activating
+                // Position and show window without activating or altering owner Z-order
                 SetWindowPos(
                     hwnd,
                     HWND_TOPMOST,
@@ -51,7 +47,7 @@ pub unsafe extern "system" fn osd_window_proc(
                     y,
                     BADGE_WIDTH,
                     BADGE_HEIGHT,
-                    SWP_NOACTIVATE | SWP_SHOWWINDOW,
+                    SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER,
                 );
 
                 InvalidateRect(hwnd, std::ptr::null(), 1);
@@ -65,7 +61,20 @@ pub unsafe extern "system" fn osd_window_proc(
             if w_param == HIDE_TIMER_ID {
                 unsafe {
                     KillTimer(hwnd, HIDE_TIMER_ID);
-                    ShowWindow(hwnd, SW_HIDE);
+                    SetWindowPos(
+                        hwnd,
+                        std::ptr::null_mut(),
+                        0,
+                        0,
+                        0,
+                        0,
+                        SWP_NOMOVE
+                            | SWP_NOSIZE
+                            | SWP_NOZORDER
+                            | SWP_NOACTIVATE
+                            | SWP_NOOWNERZORDER
+                            | SWP_HIDEWINDOW,
+                    );
                 }
             }
             0
@@ -145,7 +154,7 @@ pub fn init_osd() -> HWND {
         RegisterClassExW(&wnd_class);
 
         let hwnd = CreateWindowExW(
-            WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE,
+            WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE | WS_EX_TRANSPARENT,
             class_name.as_ptr(),
             window_name.as_ptr(),
             WS_POPUP,
@@ -160,6 +169,8 @@ pub fn init_osd() -> HWND {
         );
 
         if !hwnd.is_null() {
+            let rgn = CreateRoundRectRgn(0, 0, BADGE_WIDTH, BADGE_HEIGHT, 12, 12);
+            SetWindowRgn(hwnd, rgn, 1);
             set_osd_hwnd(hwnd);
         }
 
@@ -179,11 +190,6 @@ pub fn show_mode_badge(mode: KeyboardMode) {
             PostMessageW(hwnd, WM_SHOW_BADGE, mode_val, 0);
         }
     }
-}
-
-#[link(name = "user32")]
-unsafe extern "system" {
-    fn PostMessageW(hWnd: HWND, Msg: u32, wParam: WPARAM, lParam: LPARAM) -> BOOL;
 }
 
 unsafe fn compute_badge_position() -> (i32, i32) {

@@ -8,6 +8,7 @@ use crate::hook::{print_mode_banner, ENGINE};
 use crate::win32::*;
 
 pub const WM_TRAYICON: u32 = 0x0400 + 1; // WM_USER + 1
+pub const WM_UPDATE_TRAY_TOOLTIP: u32 = 0x0400 + 3; // WM_USER + 3
 pub const ID_TRAY_TOGGLE: usize = 1001;
 pub const ID_TRAY_CONFIG: usize = 1002;
 pub const ID_TRAY_README: usize = 1003;
@@ -15,6 +16,7 @@ pub const ID_TRAY_EXIT: usize = 1004;
 pub const ID_TRAY_SMART_CODING: usize = 1005;
 
 static TRAY_HWND: AtomicIsize = AtomicIsize::new(0);
+static TRAY_ICON: AtomicIsize = AtomicIsize::new(0);
 
 pub fn get_tray_hwnd() -> HWND {
     TRAY_HWND.load(Ordering::SeqCst) as HWND
@@ -98,6 +100,15 @@ pub unsafe extern "system" fn tray_window_proc(
             }
             0
         }
+        WM_UPDATE_TRAY_TOOLTIP => {
+            let mode = if w_param == 1 {
+                KeyboardMode::Bangla
+            } else {
+                KeyboardMode::English
+            };
+            apply_tray_tooltip_now(hwnd, mode);
+            0
+        }
         0x0002 => { // WM_DESTROY
             remove_tray_icon(hwnd);
             unsafe {
@@ -149,7 +160,7 @@ pub fn init_tray(mode: KeyboardMode) -> HWND {
 
 pub fn add_tray_icon(hwnd: HWND, mode: KeyboardMode) {
     unsafe {
-        let h_icon = load_app_icon();
+        let h_icon = get_cached_app_icon();
         let mut nid = make_nid(hwnd, h_icon);
         nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP | NIF_INFO;
         nid.uCallbackMessage = WM_TRAYICON;
@@ -168,12 +179,26 @@ pub fn add_tray_icon(hwnd: HWND, mode: KeyboardMode) {
     }
 }
 
+/// Queue an asynchronous tray tooltip update on the tray message loop so low-level hooks never block on Shell_NotifyIconW
 pub fn update_tray_tooltip(hwnd: HWND, mode: KeyboardMode) {
+    if hwnd.is_null() {
+        return;
+    }
+    let mode_val = match mode {
+        KeyboardMode::English => 0usize,
+        KeyboardMode::Bangla => 1usize,
+    };
+    unsafe {
+        PostMessageW(hwnd, WM_UPDATE_TRAY_TOOLTIP, mode_val, 0);
+    }
+}
+
+fn apply_tray_tooltip_now(hwnd: HWND, mode: KeyboardMode) {
     unsafe {
         if hwnd.is_null() {
             return;
         }
-        let h_icon = load_app_icon();
+        let h_icon = get_cached_app_icon();
         let mut nid = make_nid(hwnd, h_icon);
         nid.uFlags = NIF_TIP | NIF_ICON;
 
@@ -255,6 +280,18 @@ fn mode_name(mode: KeyboardMode) -> &'static str {
         KeyboardMode::English => "English (EN)",
         KeyboardMode::Bangla => "বাংলা (BN)",
     }
+}
+
+unsafe fn get_cached_app_icon() -> *mut std::ffi::c_void {
+    let cached = TRAY_ICON.load(Ordering::Relaxed);
+    if cached != 0 {
+        return cached as *mut std::ffi::c_void;
+    }
+    let icon = unsafe { load_app_icon() };
+    if !icon.is_null() {
+        TRAY_ICON.store(icon as isize, Ordering::Relaxed);
+    }
+    icon
 }
 
 unsafe fn load_app_icon() -> *mut std::ffi::c_void {

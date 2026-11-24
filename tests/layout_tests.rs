@@ -433,4 +433,25 @@ mod tests {
             }
         );
     }
+
+    #[test]
+    fn test_copy_paste_shortcuts_clear_pending_kar_and_passthrough() {
+        let mut engine = Engine::new();
+        engine.mode = KeyboardMode::Bangla;
+        engine.sound_enabled = false;
+
+        // Simulate Classic pre-base kar buffered (e.g. user pressed 'c' -> 'ে')
+        assert!(engine.handle_key_down(0x43, false, false, false));
+        assert_eq!(engine.pending_kar, Some("ে"));
+
+        // Pressing Ctrl+C (0x43, is_ctrl=true) must pass through (false) and clear pending_kar without SendInput
+        assert!(!engine.handle_key_down(0x43, false, false, true));
+        assert_eq!(engine.pending_kar, None);
+
+        // Buffer again and test Ctrl+V (0x56, is_ctrl=true)
+        assert!(engine.handle_key_down(0x43, false, false, false));
+        assert_eq!(engine.pending_kar, Some("ে"));
+        assert!(!engine.handle_key_down(0x56, false, false, true));
+        assert_eq!(engine.pending_kar, None);
+    }
 }

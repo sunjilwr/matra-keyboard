@@ -276,23 +276,18 @@ impl Engine {
         // Allow system shortcuts (Ctrl+C, Ctrl+V, Win+V, Win+Key, Alt+Tab, etc.) to pass through untouched
         let is_alt_gr = is_ctrl && is_alt;
         if is_win || (is_ctrl && !is_alt_gr) || (is_alt && !is_alt_gr) {
-            if is_win {
-                self.reset_state();
-            } else {
-                self.flush_pending_states();
-                self.last_typed = LastTyped::Other;
-
-                // In Smart Coding Mode: IDE navigation/file shortcuts (Ctrl+S, Ctrl+P, Ctrl+F, Ctrl+G,
-                // Ctrl+Tab, Ctrl+/, Ctrl+B, Ctrl+J, Ctrl+~) auto-switch back to English,
-                // while clipboard/edit shortcuts (Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+Z, Ctrl+Y, Ctrl+A) keep Bangla.
-                if self.smart_coding_mode
-                    && self.window_context != WindowContext::Normal
-                    && is_ctrl
-                    && !is_alt
-                    && is_ide_navigation_shortcut(vk)
-                {
-                    self.set_mode(KeyboardMode::English);
-                }
+            self.reset_state();
+            // In Smart Coding Mode: IDE navigation/file shortcuts (Ctrl+S, Ctrl+P, Ctrl+F, Ctrl+G,
+            // Ctrl+Tab, Ctrl+/, Ctrl+B, Ctrl+J, Ctrl+~) auto-switch back to English,
+            // while clipboard/edit shortcuts (Ctrl+C, Ctrl+V, Ctrl+X, Ctrl+Z, Ctrl+Y, Ctrl+A) keep Bangla.
+            if !is_win
+                && self.smart_coding_mode
+                && self.window_context != WindowContext::Normal
+                && is_ctrl
+                && !is_alt
+                && is_ide_navigation_shortcut(vk)
+            {
+                self.set_mode(KeyboardMode::English);
             }
             return false;
         }
